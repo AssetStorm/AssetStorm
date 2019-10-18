@@ -1,0 +1,58 @@
+- model: assets.AssetType
+  pk: 4
+  fields:
+    type_name: span
+- model: assets.AssetType
+  pk: 6
+  fields:
+    type_name: span-regular
+    parent_type: 4
+    schema: {"text": 1}
+- model: assets.AssetType
+  pk: 7
+  fields:
+    type_name: span-emphasized
+    parent_type: 4
+    schema: {"text": 1}
+- model: assets.AssetType
+  pk: 8
+  fields:
+    type_name: span-strong
+    parent_type: 4
+    schema: {"text": 1}
+- model: assets.AssetType
+  pk: 9
+  fields:
+    type_name: span-listing
+    parent_type: 4
+    schema: {"listing_text": 1}
+- model: assets.AssetType
+  pk: 10
+  fields:
+    type_name: span-path
+    parent_type: 4
+    schema: {"path": 1}
+- model: assets.AssetType
+  pk: 11
+  fields:
+    type_name: span-link
+    parent_type: 4
+    schema: {"link_text": 1, "url": 2}
+- model: assets.AssetType
+  pk: 12
+  fields:
+    type_name: span-program
+    parent_type: 4
+    schema: {"program_name": 1}
+- model: assets.AssetType
+  pk: 13
+  fields:
+    type_name: span-abbreviation
+    parent_type: 4
+    schema: {"abbreviation": 1, "long_name": 1}
+- model: assets.AssetType
+  pk: 14
+  fields:
+    type_name: span-ct-link
+    parent_type: 4
+    schema: {}

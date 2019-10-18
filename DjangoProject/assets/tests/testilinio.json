@@ -1,0 +1,18 @@
+{
+  "type": "article",
+  "title": "Testilinio",
+  "subtitle": "Test-Artikel für AssetStorm",
+  "abstract": "Beim Testen von AssetStorm kommt es auf realistische Testfälle an. Daher enthält dieser Artikel alles, was er soll.",
+  "author": "Pina Merkert",
+  "content": [
+    {
+      "type": "block-paragraph",
+      "spans": [
+        {
+          "type": "span-regular",
+          "text": "Das ist der Einstieg in den Artikel, der bekanntlich Lust mach weiter zu lesen."
+        }
+      ]
+    }
+  ]
+}

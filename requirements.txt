@@ -1,2 +1,4 @@
 wheel
 django
+psycopg2
+pyyaml

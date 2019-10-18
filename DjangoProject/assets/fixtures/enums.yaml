@@ -1,0 +1,10 @@
+- model: assets.Enum
+  pk: 1
+  fields:
+    items:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
