@@ -60,7 +60,7 @@
   fields:
     type_name: block-tinker-box
     parent_type: 5
-    schema: {"time": 1, "price": 1, "parts": [28], "tools": [1], "difficulty": 3}
+    schema: {"time": 1, "price": 1, "parts": [28], "tools": [1], "difficulty": {3: 1}}
 - model: assets.AssetType
   pk: 30
   fields:
@@ -72,7 +72,7 @@
   fields:
     type_name: block-listing
     parent_type: 5
-    schema: {"language": 3, "code": 1}
+    schema: {"language": {"3": 2}, "code": 1}
 - model: assets.AssetType
   pk: 32
   fields:

@@ -97,6 +97,34 @@ class TestSaveAsset(TestCase):
             'Asset': {"type":  "span-regular"}
         })
 
+    def test_unknown_language_in_listing(self):
+        response = self.client.post(reverse('save_asset'),
+                                    data={"type": "article",
+                                          "title": "Nice title",
+                                          "subtitle": "More descriptive title for the web",
+                                          "abstract": "Foo",
+                                          "author": "Max Mustermann",
+                                          "content": [
+                                              {"type": "block-paragraph",
+                                               "spans": [
+                                                   {"type": "span-regular",
+                                                    "text": "This is some text at the beginning of the article"}
+                                               ]},
+                                              {"type": "block-listing",
+                                               "language": "unknown",
+                                               "code": "print(str(12))\nfor i in range(5):\n  print(i)"}
+                                          ]},
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.maxDiff = None
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'block-listing' demands the content " +
+                     "for key 'language' to be the enum with id=2.",
+            'Asset': {"type":  "block-listing",
+                      "language": "unknown",
+                      "code": "print(str(12))\nfor i in range(5):\n  print(i)"}
+        })
+
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
             testilinio_tree = json.load(json_file)

@@ -33,9 +33,9 @@
 - model: assets.AssetType
   pk: 41
   fields:
-    type_name: table-cell-enum
+    type_name: table-cell-rating
     parent_type: 36
-    schema: {"content": 3}
+    schema: {"content": {3: 1}}
 - model: assets.AssetType
   pk: 42
   fields:

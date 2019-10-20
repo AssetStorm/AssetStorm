@@ -8,3 +8,27 @@
       - 3
       - 4
       - 5
+- model: assets.Enum
+  pk: 2
+  fields:
+    items:
+      - "python"
+      - "javascript"
+      - "c"
+      - "c++"
+      - "c#"
+      - "bash"
+      - "java"
+      - "kotlin"
+      - "go"
+      - "docker"
+      - "haskell"
+      - "fortran"
+      - "d"
+      - "pascal"
+      - "swift"
+      - "rust"
+      - "php"
+      - "perl"
+      - "r"
+      - "julia"
