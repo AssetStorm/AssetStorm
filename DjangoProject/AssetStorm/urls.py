@@ -19,5 +19,4 @@ from assets.views import save_asset
 
 urlpatterns = [
     path('save', save_asset, name="save_asset"),
-    path('admin/', admin.site.urls),
 ]

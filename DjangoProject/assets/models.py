@@ -28,7 +28,7 @@ class Asset(models.Model):
         elif content_type == 2:  # uri-element
             return UriElement.objects.get(pk=content_id).uri
         elif content_type == 3:  # enum
-            return Enum.objects.get(pk=content_id).items
+            return Enum.objects.get(pk=content_id[0]).items[content_id[1]]
         else:
             return Asset.objects.get(pk=uuid.UUID(content_id)).content
 
@@ -41,13 +41,12 @@ class Asset(models.Model):
             'id': str(self.pk)
         }
         for k in self.content_ids.keys():
-            #print("processing key \"" + k + "\" with type " + str(self.t.schema[k]) +
-            #      " and id: " + str(self.content_ids[k]))
             if type(self.t.schema[k]) is list:
-                #print("Type: " + str(self.t.schema[k][0]))
-                #print("List: " + str(self.content_ids[k]))
-                #print(list(Asset.objects.all()))
                 asset_content = [self.get_asset_content(self.t.schema[k][0], e) for e in self.content_ids[k]]
+            elif type(self.t.schema[k]) is dict and \
+                    len(self.t.schema[k].keys()) == 1 and \
+                    "3" in self.t.schema[k].keys():
+                asset_content = self.get_asset_content(3, (self.t.schema[k]["3"], self.content_ids[k]))
             else:
                 asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             content[k] = asset_content

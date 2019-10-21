@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from ..models import AssetType, Asset, Text
+from assets.models import AssetType, Asset, Text, UriElement, Enum
 import json
 import uuid
 
@@ -82,3 +82,20 @@ class AssetBasicTestCase(TestCase):
                 ]}
             ]
         }))
+
+    def test_listing_block(self):
+        title = Text(text="Box Title")
+        title.save()
+        code = Text(text="a = 2 + 4\nprint(a)")
+        code.save()
+        language_no = Enum.objects.get(pk=2).items.index("python")
+        listing_block = Asset(t=self.at("block-listing"), content_ids={
+            "language": language_no,
+            "code": code.pk
+        })
+        listing_block.save()
+        box = Asset(t=self.at("block-accompaniement-box"), content_ids={
+            "title": title.pk,
+            "content": [str(listing_block.pk)]})
+        box.save()
+        print(json.dumps(box.content, indent=2))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from ..helpers import consume_str, create_assets_from_markdown
+from assets.helpers import consume_str, create_assets_from_markdown
 
 
 class TestPandocStringConsumer(TestCase):

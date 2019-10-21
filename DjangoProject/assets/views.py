@@ -12,7 +12,6 @@ class AssetStructureError(Exception):
 
 def save_asset(request):
     def check_type(expected_type, actual_type, asset_type_name, current_key, current_tree):
-        print("expected_type:", expected_type)
         if expected_type == 1:
             if actual_type is not str:
                 raise AssetStructureError(
@@ -28,14 +27,6 @@ def save_asset(request):
                         asset_type_name,
                         current_key))
         elif type(expected_type) is dict and len(expected_type.keys()) == 1:
-            """if actual_type is not dict or len(current_tree[current_key]) == 1 or \
-                    type(current_tree[current_key].keys()[0]) is not int or \
-                    type(current_tree[current_key][current_tree[current_key].keys()[0]]) is not int:
-                raise AssetStructureError(
-                    current_tree,
-                    "The Schema of AssetType '%s' demands the content for key '%s' to be an enum." % (
-                        asset_type_name,
-                        current_key))"""
             enum = Enum.objects.get(pk=expected_type["3"])
             if current_tree[current_key] not in enum.items:
                 raise AssetStructureError(
