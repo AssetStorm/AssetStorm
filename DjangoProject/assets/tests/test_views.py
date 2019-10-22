@@ -147,4 +147,3 @@ class TestSaveAsset(TestCase):
                     check_tree["content"][i]["spans"][j]["id"] = str(span_asset.pk)
             check_tree["content"][i]["id"] = str(block_asset.pk)
         self.assertJSONEqual(json.dumps(article_asset.content), json.dumps(check_tree))
-        print(json.dumps(article_asset.content, indent=2))
