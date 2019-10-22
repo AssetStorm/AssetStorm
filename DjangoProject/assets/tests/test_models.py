@@ -66,7 +66,6 @@ class AssetBasicTestCase(TestCase):
             "content": [str(intro.pk), str(end.pk)]
         })
         a.save()
-        print(json.dumps(a.content, indent=2))
         self.assertJSONEqual(json.dumps(a.content), json.dumps({
             "type": "article",
             "id": str(a.pk),
@@ -100,4 +99,16 @@ class AssetBasicTestCase(TestCase):
             "title": title.pk,
             "content": [str(listing_block.pk)]})
         box.save()
-        print(json.dumps(box.content, indent=2))
+        self.assertJSONEqual(json.dumps(box.content), json.dumps({
+            "type": "block-accompaniement-box",
+            "id": str(box.pk),
+            "title": "Box Title",
+            "content": [
+                {
+                    "type": "block-listing",
+                    "id": str(listing_block.pk),
+                    "code": "a = 2 + 4\nprint(a)",
+                    "language": "python"
+                }
+            ]
+        }))
