@@ -54,6 +54,7 @@ class Asset(models.Model):
             else:
                 asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             content[k] = asset_content
+        self.content_cache = content
         return content
 
 
