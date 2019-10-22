@@ -2,7 +2,6 @@
 from django.test import TestCase
 from assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum
 import json
-import uuid
 
 
 class AssetBasicTestCase(TestCase):
@@ -110,5 +109,43 @@ class AssetBasicTestCase(TestCase):
                     "code": "a = 2 + 4\nprint(a)",
                     "language": "python"
                 }
+            ]
+        }))
+
+    def test_span_link(self):
+        start = Text(text="In this sentence is a ")
+        start.save()
+        link_text = Text(text="link")
+        link_text.save()
+        link_target = UriElement(uri="https://ct.de")
+        link_target.save()
+        end = Text(text=" which leads to https://ct.de.")
+        end.save()
+        start_span = Asset(t=self.at("span-regular"), content_ids={"text": start.pk})
+        start_span.save()
+        link_span = Asset(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_target.pk})
+        link_span.save()
+        end_span = Asset(t=self.at("span-regular"), content_ids={"text": end.pk})
+        end_span.save()
+        paragraph = Asset(t=self.at("block-paragraph"), content_ids={"spans": [
+            str(start_span.pk),
+            str(link_span.pk),
+            str(end_span.pk)]})
+        paragraph.save()
+        self.maxDiff = None
+        self.assertJSONEqual(json.dumps(paragraph.content), json.dumps({
+            "type": "block-paragraph",
+            "id": str(paragraph.pk),
+            "spans": [
+                {"type": "span-regular",
+                 "id": str(start_span.pk),
+                 "text": "In this sentence is a "},
+                {"type": "span-link",
+                 "id": str(link_span.pk),
+                 "link_text": "link",
+                 "url": "https://ct.de"},
+                {"type": "span-regular",
+                 "id": str(end_span.pk),
+                 "text": " which leads to https://ct.de."},
             ]
         }))
