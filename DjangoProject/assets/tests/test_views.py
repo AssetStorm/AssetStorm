@@ -116,7 +116,6 @@ class TestSaveAsset(TestCase):
                                           ]},
                                     content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.maxDiff = None
         self.assertJSONEqual(response.content, {
             "Error": "The Schema of AssetType 'block-listing' demands the content " +
                      "for key 'language' to be the enum_type with id=2.",
@@ -124,6 +123,58 @@ class TestSaveAsset(TestCase):
                       "language": "unknown",
                       "code": "print(str(12))\nfor i in range(5):\n  print(i)"}
         })
+
+    def test_invalid_asset_id(self):
+        response = self.client.post(reverse('save_asset'),
+                                    data={"id": "foo"},
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The id 'foo' is not a valid uuid (v4).",
+            "Asset": {"id": "foo"}
+        })
+
+    def test_unknown_asset_id(self):
+        response = self.client.post(reverse('save_asset'),
+                                    data={"id": "412575db-7407-4de9-936f-050dd7827f59"},
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.maxDiff = None
+        self.assertJSONEqual(response.content, {
+            "Error": "An Asset with id 412575db-7407-4de9-936f-050dd7827f59 does not exist.",
+            "Asset": {"id": "412575db-7407-4de9-936f-050dd7827f59"}
+        })
+
+    def test_modify_asset(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": [
+                      {"type": "span-regular",
+                       "text": "This is some text at the beginning of the article"}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": json.loads(response.content)["id"]
+        })
+        asset = Asset.objects.get(pk=json.loads(response.content)["id"])
+        self.assertEqual(asset.content["spans"][0]["text"], "This is some text at the beginning of the article")
+        json_content = asset.content.copy()
+        json_content["spans"][0]["text"] = "This text is changed."
+        response2 = self.client.post(
+            reverse('save_asset'),
+            data=json_content,
+            content_type="application/json")
+        self.assertEqual(response2.status_code, 200)
+        self.assertJSONEqual(response2.content, {
+            "Success": True,
+            "id": str(asset.pk)
+        })
+        modified_asset = Asset.objects.get(pk=json.loads(response2.content)["id"])
+        self.assertEqual(modified_asset.pk, asset.pk)
+        self.assertEqual(modified_asset.content["spans"][0]["text"], "This text is changed.")
 
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
@@ -135,7 +186,8 @@ class TestSaveAsset(TestCase):
         title = Text.objects.get(text="Testilinio")
         article_asset = Asset.objects.get(content_ids__title=title.pk)
         self.assertJSONEqual(response.content, {
-            "Success": True
+            "Success": True,
+            "id": str(article_asset.pk)
         })
         check_tree = testilinio_tree.copy()
         check_tree["id"] = str(article_asset.pk)

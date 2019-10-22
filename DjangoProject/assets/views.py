@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseBadRequest, HttpResponse
 from assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
+import uuid
 
 
 class AssetStructureError(Exception):
@@ -49,6 +50,14 @@ def save_asset(request):
 
     def check_asset(tree, expected_asset_type_id=None):
         try:
+            if "id" in tree.keys():
+                try:
+                    uuid.UUID(tree["id"], version=4)
+                except ValueError:
+                    raise AssetStructureError(tree, "The id '%s' is not a valid uuid (v4)." % tree["id"])
+                Asset.objects.get(pk=tree["id"])
+                if "type" not in tree.keys():
+                    return None
             asset_type = AssetType.objects.get(type_name=tree["type"])
             if expected_asset_type_id is not None and (
                     asset_type.pk != expected_asset_type_id and
@@ -91,6 +100,8 @@ def save_asset(request):
             raise AssetStructureError(tree, "Unknown AssetType: " + tree["type"])
         except Enum.DoesNotExist:
             raise AssetStructureError(tree, "Unknown Enum: " + str(tree[key]))
+        except Asset.DoesNotExist:
+            raise AssetStructureError(tree, "An Asset with id %s does not exist." % tree["id"])
 
     def create_asset(tree, item_type=None):
         if item_type == 1:
@@ -113,20 +124,58 @@ def save_asset(request):
             if type(asset_type.schema[key]) is list:
                 item_ids_list = []
                 for list_item in tree[key]:
-                    item_ids_list.append(create_asset(list_item, item_type=asset_type.schema[key][0]))
+                    item_ids_list.append(create_or_modify_asset(list_item, item_type=asset_type.schema[key][0]))
                 content_ids[key] = item_ids_list
             else:
-                content_ids[key] = create_asset(tree[key], item_type=asset_type.schema[key])
+                content_ids[key] = create_or_modify_asset(tree[key], item_type=asset_type.schema[key])
         asset = Asset(t=asset_type, content_ids=content_ids)
         asset.save()
         return str(asset.pk)
 
+    def modify_asset(tree):
+        old_asset = Asset.objects.get(pk=tree["id"])
+        old_asset.pk = None
+        old_asset.save()
+        asset = Asset.objects.get(pk=tree["id"])
+        asset.revision_chain = old_asset
+        for key in asset.t.schema.keys():
+            if key in tree:
+                if asset.t.schema[key] == 1:
+                    old_text = Text.objects.get(pk=asset.content_ids[key])
+                    if tree[key] != old_text.text:
+                        asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
+                elif asset.t.schema[key] == 2:
+                    old_uri = UriElement.objects.get(pk=asset.content_ids[key])
+                    if tree[key] != old_uri.uri:
+                        asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
+                elif type(asset.t.schema[key]) is dict and \
+                        len(asset.t.schema[key].keys()) == 1 and \
+                        "3" in asset.t.schema[key].keys():
+                    old_enum = Enum.objects.get(pk=asset.content_ids[key])
+                    if tree[key] != old_enum.item:
+                        asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
+                elif type(asset.t.schema[key]) is list:
+                    item_ids_list = []
+                    for list_item in tree[key]:
+                        item_ids_list.append(create_or_modify_asset(list_item, item_type=asset.t.schema[key][0]))
+                    asset.content_ids[key] = item_ids_list
+                else:
+                    asset.content_ids[key] = create_or_modify_asset(tree[key], item_type=asset.t.schema[key])
+        asset.save()
+        return str(asset.pk)
+
+    def create_or_modify_asset(tree, item_type=None):
+        if type(tree) is dict and "id" in tree.keys():
+            return modify_asset(tree)
+        return create_asset(tree, item_type)
+
     try:
         full_tree = json.loads(request.body, encoding='utf-8')
         check_asset(full_tree)
-        create_asset(full_tree)
+        asset_pk = create_or_modify_asset(full_tree)
         return HttpResponse(content=json.dumps({
-            "Success": True
+            "Success": True,
+            "id": asset_pk
         }), content_type="application/json")
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest(content=json.dumps({
