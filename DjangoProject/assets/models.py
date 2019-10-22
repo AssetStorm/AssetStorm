@@ -14,6 +14,10 @@ class AssetType(models.Model):
         return "(" + str(self.pk) + ") " + self.type_name + " " + schema_str
 
 
+class EnumType(models.Model):
+    items = ArrayField(models.TextField())
+
+
 class Asset(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     t = models.ForeignKey(AssetType, on_delete=models.CASCADE, related_name="assets")
@@ -28,7 +32,7 @@ class Asset(models.Model):
         elif content_type == 2:  # uri-element
             return UriElement.objects.get(pk=content_id).uri
         elif content_type == 3:  # enum
-            return Enum.objects.get(pk=content_id[0]).items[content_id[1]]
+            return Enum.objects.get(pk=content_id).item
         else:
             return Asset.objects.get(pk=uuid.UUID(content_id)).content
 
@@ -46,7 +50,7 @@ class Asset(models.Model):
             elif type(self.t.schema[k]) is dict and \
                     len(self.t.schema[k].keys()) == 1 and \
                     "3" in self.t.schema[k].keys():
-                asset_content = self.get_asset_content(3, (self.t.schema[k]["3"], self.content_ids[k]))
+                asset_content = self.get_asset_content(3, self.content_ids[k])
             else:
                 asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             content[k] = asset_content
@@ -62,4 +66,5 @@ class UriElement(models.Model):
 
 
 class Enum(models.Model):
-    items = ArrayField(models.TextField())
+    t = models.ForeignKey(EnumType, on_delete=models.CASCADE)
+    item = models.TextField()

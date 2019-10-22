@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
-from assets.models import AssetType
+from assets.models import AssetType, Asset, Text
 import json
 import os
 
@@ -13,7 +13,7 @@ class TestSaveAsset(TestCase):
         'caption-span_assets.yaml',
         'block_assets.yaml',
         'table.yaml',
-        'enums.yaml'
+        'enum_types.yaml'
     ]
 
     def setUp(self) -> None:
@@ -119,7 +119,7 @@ class TestSaveAsset(TestCase):
         self.maxDiff = None
         self.assertJSONEqual(response.content, {
             "Error": "The Schema of AssetType 'block-listing' demands the content " +
-                     "for key 'language' to be the enum with id=2.",
+                     "for key 'language' to be the enum_type with id=2.",
             'Asset': {"type":  "block-listing",
                       "language": "unknown",
                       "code": "print(str(12))\nfor i in range(5):\n  print(i)"}
@@ -132,6 +132,19 @@ class TestSaveAsset(TestCase):
                                     data=testilinio_tree,
                                     content_type="application/json")
         self.assertEqual(response.status_code, 200)
+        title = Text.objects.get(text="Testilinio")
+        article_asset = Asset.objects.get(content_ids__title=title.pk)
         self.assertJSONEqual(response.content, {
             "Success": True
         })
+        check_tree = testilinio_tree.copy()
+        check_tree["id"] = str(article_asset.pk)
+        for i, block_id in enumerate(article_asset.content_ids["content"]):
+            block_asset = Asset.objects.get(pk=block_id)
+            if block_asset.t.type_name == "block-paragraph":
+                for j, span_id in enumerate(block_asset.content_ids["spans"]):
+                    span_asset = Asset.objects.get(pk=span_id)
+                    check_tree["content"][i]["spans"][j]["id"] = str(span_asset.pk)
+            check_tree["content"][i]["id"] = str(block_asset.pk)
+        self.assertJSONEqual(json.dumps(article_asset.content), json.dumps(check_tree))
+        print(json.dumps(article_asset.content, indent=2))

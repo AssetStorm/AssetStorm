@@ -13,6 +13,11 @@
           "text": "Das ist der Einstieg in den Artikel, der bekanntlich Lust mach weiter zu lesen."
         }
       ]
+    },
+    {
+      "type": "block-listing",
+      "language": "python",
+      "code": "a = 2 + 5\nprint(a)"
     }
   ]
 }

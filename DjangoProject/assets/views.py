@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest, HttpResponse
-from assets.models import AssetType, Enum
+from assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
 
 
@@ -27,14 +27,14 @@ def save_asset(request):
                         asset_type_name,
                         current_key))
         elif type(expected_type) is dict and len(expected_type.keys()) == 1:
-            enum = Enum.objects.get(pk=expected_type["3"])
-            if current_tree[current_key] not in enum.items:
+            enum_type = EnumType.objects.get(pk=expected_type["3"])
+            if current_tree[current_key] not in enum_type.items:
                 raise AssetStructureError(
                     current_tree,
-                    "The Schema of AssetType '%s' demands the content for key '%s' to be the enum with id=%d." % (
+                    "The Schema of AssetType '%s' demands the content for key '%s' to be the enum_type with id=%d." % (
                         asset_type_name,
                         current_key,
-                        enum.pk))
+                        enum_type.pk))
         else:
             if actual_type is dict:
                 check_asset(current_tree, expected_asset_id=expected_type)
@@ -85,7 +85,6 @@ def save_asset(request):
                                asset_type.type_name,
                                key,
                                tree)
-            return str(asset_type.schema)
         except KeyError as err:
             raise AssetStructureError(tree, "Missing key in Asset: " + str(err))
         except AssetType.DoesNotExist:
@@ -93,12 +92,41 @@ def save_asset(request):
         except Enum.DoesNotExist:
             raise AssetStructureError(tree, "Unknown Enum: " + str(tree[key]))
 
+    def create_asset(tree, item_type=None):
+        if item_type == 1:
+            text_item = Text(text=tree)
+            text_item.save()
+            return text_item.pk
+        if item_type == 2:
+            uri_item = UriElement(uri=tree)
+            uri_item.save()
+            return uri_item.pk
+        if type(item_type) is dict and \
+                len(item_type.keys()) == 1 and \
+                "3" in item_type.keys():
+            enum_item = Enum(t=EnumType.objects.get(pk=item_type["3"]), item=tree)
+            enum_item.save()
+            return enum_item.pk
+        asset_type = AssetType.objects.get(type_name=tree["type"])
+        content_ids = {}
+        for key in asset_type.schema.keys():
+            if type(asset_type.schema[key]) is list:
+                item_ids_list = []
+                for list_item in tree[key]:
+                    item_ids_list.append(create_asset(list_item, item_type=asset_type.schema[key][0]))
+                content_ids[key] = item_ids_list
+            else:
+                content_ids[key] = create_asset(tree[key], item_type=asset_type.schema[key])
+        asset = Asset(t=asset_type, content_ids=content_ids)
+        asset.save()
+        return str(asset.pk)
+
     try:
         full_tree = json.loads(request.body, encoding='utf-8')
-        check_result = check_asset(full_tree)
+        check_asset(full_tree)
+        create_asset(full_tree)
         return HttpResponse(content=json.dumps({
-            "Success": True,
-            "check_result": check_result
+            "Success": True
         }), content_type="application/json")
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest(content=json.dumps({

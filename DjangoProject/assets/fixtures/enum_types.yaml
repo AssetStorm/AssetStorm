@@ -1,14 +1,14 @@
-- model: assets.Enum
+- model: assets.EnumType
   pk: 1
   fields:
     items:
-      - 0
-      - 1
-      - 2
-      - 3
-      - 4
-      - 5
-- model: assets.Enum
+      - "0"
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+      - "5"
+- model: assets.EnumType
   pk: 2
   fields:
     items:

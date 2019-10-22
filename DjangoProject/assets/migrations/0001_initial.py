@@ -16,10 +16,18 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Enum',
+            name='EnumType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('items', django.contrib.postgres.fields.ArrayField(base_field=models.TextField(), size=None)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Enum',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('t', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='assets.EnumType')),
+                ('item', models.TextField()),
             ],
         ),
         migrations.CreateModel(

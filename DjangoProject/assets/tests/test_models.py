@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from assets.models import AssetType, Asset, Text, UriElement, Enum
+from assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum
 import json
 import uuid
 
@@ -11,7 +11,7 @@ class AssetBasicTestCase(TestCase):
         'caption-span_assets.yaml',
         'block_assets.yaml',
         'table.yaml',
-        'enums.yaml'
+        'enum_types.yaml'
     ]
 
     def at(self, type_name):
@@ -88,9 +88,11 @@ class AssetBasicTestCase(TestCase):
         title.save()
         code = Text(text="a = 2 + 4\nprint(a)")
         code.save()
-        language_no = Enum.objects.get(pk=2).items.index("python")
+        language_type = EnumType.objects.get(pk=2)
+        language = Enum(t=language_type, item="python")
+        language.save()
         listing_block = Asset(t=self.at("block-listing"), content_ids={
-            "language": language_no,
+            "language": language.pk,
             "code": code.pk
         })
         listing_block.save()
