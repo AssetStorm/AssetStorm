@@ -37,7 +37,7 @@ def save_asset(request):
                         enum_type.pk))
         else:
             if actual_type is dict:
-                check_asset(current_tree, expected_asset_id=expected_type)
+                check_asset(current_tree, expected_asset_type_id=expected_type)
             else:
                 raise AssetStructureError(
                     current_tree,
@@ -47,16 +47,16 @@ def save_asset(request):
                     "Assets are saved as JSON-objects with an inner structure matching the schema " +
                     "of their type.")
 
-    def check_asset(tree, expected_asset_id=None):
+    def check_asset(tree, expected_asset_type_id=None):
         try:
             asset_type = AssetType.objects.get(type_name=tree["type"])
-            if expected_asset_id is not None and (
-                    asset_type.pk != expected_asset_id and
-                    asset_type.parent_type.pk != expected_asset_id):
+            if expected_asset_type_id is not None and (
+                    asset_type.pk != expected_asset_type_id and
+                    asset_type.parent_type.pk != expected_asset_type_id):
                 raise AssetStructureError(
                     tree,
-                    "Expected an Asset with id %d but got '%s' with id %d." % (
-                        expected_asset_id,
+                    "Expected an AssetType with id %d but got '%s' with id %d." % (
+                        expected_asset_type_id,
                         asset_type.type_name,
                         asset_type.pk))
             for key in asset_type.schema.keys():
