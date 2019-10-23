@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from assets.views import save_asset
+from assets.views import load_asset, save_asset
 
 urlpatterns = [
+    path('load', load_asset, name="load_asset"),
     path('save', save_asset, name="save_asset"),
 ]

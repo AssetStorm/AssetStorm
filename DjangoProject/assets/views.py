@@ -11,6 +11,21 @@ class AssetStructureError(Exception):
         self.asset = asset
 
 
+def load_asset(request):
+    if "id" not in request.GET:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "Please supply a 'id' as a GET param."
+        }), content_type="application/json")
+    try:
+        asset = Asset.objects.get(pk=request.GET["id"])
+        return HttpResponse(content=json.dumps(asset.content),
+                            content_type="application/json")
+    except Asset.DoesNotExist:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "No Asset with id=%s found." % request.GET["id"]
+        }), content_type="application/json")
+
+
 def save_asset(request):
     def check_type(expected_type, actual_type, asset_type_name, current_key, current_tree):
         if expected_type == 1:

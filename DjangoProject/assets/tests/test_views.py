@@ -7,6 +7,68 @@ import json
 import os
 
 
+class TestLoadAsset(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_no_params(self):
+        response = self.client.get(reverse('load_asset'))
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            'Error': "Please supply a 'id' as a GET param."
+        })
+
+    def test_wrong_id(self):
+        response = self.client.get(reverse('load_asset'),
+                                   {"id": "cd1249e5-3955-4468-87be-d912e1adb2d9"})
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            'Error': "No Asset with id=cd1249e5-3955-4468-87be-d912e1adb2d9 found."
+        })
+
+    def test_load_block(self):
+        title = Text(text="Text Box Title")
+        title.save()
+        content = Text(text="This is the content of the box.")
+        content.save()
+        span = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={
+            "text": content.pk
+        })
+        span.save()
+        paragraph_block = Asset(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={
+            "spans": [str(span.pk)]
+        })
+        paragraph_block.save()
+        box = Asset(t=AssetType.objects.get(type_name="block-accompaniement-box"), content_ids={
+            "title": title.pk,
+            "content": [str(paragraph_block.pk)]})
+        box.save()
+        response = self.client.get(reverse('load_asset'), {"id": str(box.pk)})
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "type": "block-accompaniement-box",
+            "title": "Text Box Title",
+            "id": str(box.pk),
+            "content": [
+                {"type": "block-paragraph",
+                 "id": str(paragraph_block.pk),
+                 "spans": [
+                     {"type": "span-regular",
+                      "id": str(span.pk),
+                      "text": "This is the content of the box."}
+                 ]}
+            ]
+        })
+
+
 class TestSaveAsset(TestCase):
     fixtures = [
         'span_assets.yaml',
