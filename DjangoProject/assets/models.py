@@ -23,7 +23,9 @@ class Asset(models.Model):
     t = models.ForeignKey(AssetType, on_delete=models.CASCADE, related_name="assets")
     content_ids = JSONField(blank=True, null=True)
     content_cache = JSONField(blank=True, null=True)
-    invalidation_list = ArrayField(models.IntegerField(), blank=True, null=True)
+    invalidation_list = ArrayField(
+        models.UUIDField(default=uuid.uuid4, editable=False, blank=False, null=False),
+        blank=True, null=True)
     revision_chain = models.ForeignKey("Asset", on_delete=models.SET_NULL,
                                        related_name="new_version", blank=True, null=True)
 
