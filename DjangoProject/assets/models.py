@@ -26,7 +26,7 @@ class Asset(models.Model):
     invalidation_list = ArrayField(
         models.UUIDField(default=uuid.uuid4, editable=False, blank=False, null=False),
         blank=True, null=True)
-    revision_chain = models.ForeignKey("Asset", on_delete=models.SET_NULL,
+    revision_chain = models.ForeignKey("self", on_delete=models.SET_NULL,
                                        related_name="new_version", blank=True, null=True)
 
     @staticmethod
@@ -44,6 +44,7 @@ class Asset(models.Model):
     def content(self):
         if self.content_cache is not None:
             return self.content_cache
+        invalidation_list = [self.pk]
         content = {
             'type': self.t.type_name,
             'id': str(self.pk)
