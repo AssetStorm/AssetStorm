@@ -149,3 +149,19 @@ class AssetBasicTestCase(TestCase):
                  "text": " which leads to https://ct.de."},
             ]
         }))
+
+    def test_cache_usage(self):
+        text = Text(text="cached span")
+        text.save()
+        text_span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        text_span.save()
+        self.assertIsNone(text_span.content_cache)
+        expected_content = json.dumps({
+            'type': "span-regular",
+            'id': str(text_span.pk),
+            'text': "cached span"
+        })
+        self.assertJSONEqual(json.dumps(text_span.content), expected_content)
+        self.assertIsNotNone(text_span.content_cache)
+        self.assertJSONEqual(json.dumps(text_span.content_cache), expected_content)
+        self.assertJSONEqual(json.dumps(text_span.content), expected_content)
