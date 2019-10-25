@@ -23,32 +23,59 @@ class Asset(models.Model):
     t = models.ForeignKey(AssetType, on_delete=models.CASCADE, related_name="assets")
     content_ids = JSONField(blank=True, null=True)
     content_cache = JSONField(blank=True, null=True)
+    text_reference_list = ArrayField(models.IntegerField(), default=list)
+    uri_reference_list = ArrayField(models.IntegerField(), default=list)
+    enum_reference_list = ArrayField(models.IntegerField(), default=list)
     asset_reference_list = ArrayField(
-        models.UUIDField(default=uuid.uuid4, editable=False, blank=False, null=False),
-        blank=True, null=True)
+        models.UUIDField(default=uuid.uuid4, editable=False, blank=False, null=False), default=list)
     revision_chain = models.ForeignKey("self", on_delete=models.SET_NULL,
                                        related_name="new_version", blank=True, null=True)
 
-    @staticmethod
-    def get_asset_content(content_type, content_id, invalidation_list):
-        if content_type == 1:  # text
-            return Text.objects.get(pk=content_id).text
-        elif content_type == 2:  # uri-element
-            return UriElement.objects.get(pk=content_id).uri
-        elif content_type == 3:  # enum
-            return Enum.objects.get(pk=content_id).item
-        else:
-            return Asset.objects.get(pk=uuid.UUID(content_id)).get_content(invalidation_list=invalidation_list)
+    def clear_reference_lists(self):
+        self.text_reference_list.clear()
+        self.uri_reference_list.clear()
+        self.enum_reference_list.clear()
+        self.asset_reference_list.clear()
 
-    def get_content(self, invalidation_list=[]):
-        if self.invalidation_list is None:
-            self.invalidation_list = []
-        for uid in invalidation_list:
-            self.invalidation_list.append(uid)
-        invalidation_list.append(self.pk)
+    def register_reference_to_text(self, text):
+        if text.pk not in self.text_reference_list:
+            self.text_reference_list.append(text.pk)
+
+    def register_reference_to_uri(self, uri):
+        if uri.pk not in self.uri_reference_list:
+            self.uri_reference_list.append(uri.pk)
+
+    def register_reference_to_enum(self, enum):
+        if enum.pk not in self.enum_reference_list:
+            self.enum_reference_list.append(enum.pk)
+
+    def register_reference_to_sub_asset(self, sub_asset):
+        if sub_asset.pk not in self.asset_reference_list:
+            self.asset_reference_list.append(sub_asset.pk)
+
+    def get_asset_content(self, content_type, content_id):
+        if content_type == 1:  # text
+            text = Text.objects.get(pk=content_id)
+            self.register_reference_to_text(text)
+            return text.text
+        elif content_type == 2:  # uri-element
+            uri_element = UriElement.objects.get(pk=content_id)
+            self.register_reference_to_uri(uri_element)
+            return uri_element.uri
+        elif content_type == 3:  # enum
+            enum = Enum.objects.get(pk=content_id)
+            self.register_reference_to_enum(enum)
+            return enum.item
+        else:
+            sub_asset = Asset.objects.get(pk=uuid.UUID(content_id))
+            self.register_reference_to_sub_asset(sub_asset)
+            return sub_asset.content
+
+    @property
+    def content(self):
         if self.content_cache is not None:
-            self.save()
             return self.content_cache
+        self.clear_reference_lists()
         self.content_cache = {
             'type': self.t.type_name,
             'id': str(self.pk)
@@ -56,30 +83,24 @@ class Asset(models.Model):
         for k in self.content_ids.keys():
             if type(self.t.schema[k]) is list:
                 asset_content = [
-                    self.get_asset_content(self.t.schema[k][0], e, invalidation_list=invalidation_list)
+                    self.get_asset_content(self.t.schema[k][0], e)
                     for e in self.content_ids[k]
                 ]
             elif type(self.t.schema[k]) is dict and \
                     len(self.t.schema[k].keys()) == 1 and \
                     "3" in self.t.schema[k].keys():
-                asset_content = self.get_asset_content(3, self.content_ids[k],
-                                                       invalidation_list=invalidation_list)
+                asset_content = self.get_asset_content(3, self.content_ids[k])
             else:
-                asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k],
-                                                       invalidation_list=invalidation_list)
+                asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             self.content_cache[k] = asset_content
         self.save()
         return self.content_cache
 
-    @property
-    def content(self):
-        return self.get_content(invalidation_list=[])
-
     def clear_cache(self):
-        if self.invalidation_list is not None:
-            for asset in Asset.objects.filter(pk__in=self.invalidation_list):
-                asset.clear_cache()
+        for asset in Asset.objects.filter(asset_reference_list__contains=[self.pk]):
+            asset.clear_cache()
         self.content_cache = None
+        self.clear_reference_lists()
         self.save()
 
 

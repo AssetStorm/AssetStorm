@@ -60,9 +60,14 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('content_ids', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ('content_cache', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
+                ('text_reference_list', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.IntegerField(), default=list, size=None)),
+                ('uri_reference_list', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.IntegerField(), default=list, size=None)),
+                ('enum_reference_list', django.contrib.postgres.fields.ArrayField(
+                    base_field=models.IntegerField(), default=list, size=None)),
                 ('asset_reference_list', django.contrib.postgres.fields.ArrayField(
-                    base_field=models.UUIDField(default=uuid.uuid4, editable=False),
-                    blank=True, null=True, size=None)),
+                    base_field=models.UUIDField(default=uuid.uuid4, editable=False), default=list, size=None)),
                 ('t', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assets',
                                         to='assets.AssetType')),
                 ('revision_chain', models.ForeignKey(

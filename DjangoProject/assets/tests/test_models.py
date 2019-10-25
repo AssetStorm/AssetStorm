@@ -199,16 +199,95 @@ class AssetBasicTestCase(TestCase):
         self.assertIsNone(span.content_cache)
         self.assertIsNone(block.content_cache)
 
-    def test_invalidation_with_query(self):
-        text = Text(text="cached text")
+    def test_reference_lists(self):
+        text = Text(text="text in span and a ")
         text.save()
-        span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
-        span.save()
-        block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(span.pk)]})
-        block.save()
-        print(json.dumps(block.content, indent=2))
-        print(json.dumps(block.content_ids, indent=2))
-        print("searching for", str(span.pk))
-        print(list(
-            Asset.objects.filter(content_ids__in=str(span.pk))
-        ))
+        text_span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        text_span.save()
+        link_text = Text(text="link text.")
+        link_text.save()
+        link_url = UriElement(uri="https://ct.de")
+        link_url.save()
+        link_span = Asset(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_url.pk})
+        link_span.save()
+        text_block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(text_span.pk), str(link_span.pk)]})
+        text_block.save()
+        code = Text(text="a = 2 + 1\nprint(a == 3)")
+        code.save()
+        code_lang = Enum(t=EnumType.objects.get(pk=2), item="python")
+        code_lang.save()
+        listing_block = Asset(t=self.at("block-listing"), content_ids={"language": code_lang.pk, "code": code.pk})
+        listing_block.save()
+        box_heading = Text(text="Box heading")
+        box_heading.save()
+        box = Asset(t=self.at("block-info-box"), content_ids={
+            "title": box_heading.pk,
+            "content": [str(text_block.pk), str(listing_block.pk)]})
+        box.save()
+        self.assertJSONEqual(json.dumps(box.content), json.dumps({
+            "type": "block-info-box",
+            "id": str(box.pk),
+            "title": "Box heading",
+            "content": [
+                {
+                    "type": "block-paragraph",
+                    "id": str(text_block.pk),
+                    "spans": [
+                        {
+                            "type": "span-regular",
+                            "id": str(text_span.pk),
+                            "text": "text in span and a "
+                        },
+                        {
+                            "type": "span-link",
+                            "id": str(link_span.pk),
+                            "url": "https://ct.de",
+                            "link_text": "link text."
+                        }
+                    ]
+                },
+                {
+                    "type": "block-listing",
+                    "id": str(listing_block.pk),
+                    "code": "a = 2 + 1\nprint(a == 3)",
+                    "language": "python"
+                }
+            ]
+        }))
+        text_block = Asset.objects.get(pk=text_block.pk)
+        listing_block = Asset.objects.get(pk=listing_block.pk)
+        text_span = Asset.objects.get(pk=text_span.pk)
+        link_span = Asset.objects.get(pk=link_span.pk)
+        self.assertIn(text_block.pk, box.asset_reference_list)
+        self.assertIn(listing_block.pk, box.asset_reference_list)
+        self.assertNotIn(text_span.pk, box.asset_reference_list)
+        self.assertNotIn(link_span.pk, box.asset_reference_list)
+        self.assertIn(box_heading.pk, box.text_reference_list)
+        self.assertNotIn(link_text.pk, box.text_reference_list)
+        self.assertEqual(len(box.text_reference_list), 1)
+        self.assertEqual(len(box.uri_reference_list), 0)
+        self.assertEqual(len(box.enum_reference_list), 0)
+        self.assertEqual(len(box.asset_reference_list), 2)
+        self.assertIn(text_span.pk, text_block.asset_reference_list)
+        self.assertIn(link_span.pk, text_block.asset_reference_list)
+        self.assertEqual(len(text_block.text_reference_list), 0)
+        self.assertEqual(len(text_block.uri_reference_list), 0)
+        self.assertEqual(len(text_block.enum_reference_list), 0)
+        self.assertEqual(len(text_block.asset_reference_list), 2)
+        self.assertIn(code.pk, listing_block.text_reference_list)
+        self.assertIn(code_lang.pk, listing_block.enum_reference_list)
+        self.assertEqual(len(listing_block.text_reference_list), 1)
+        self.assertEqual(len(listing_block.uri_reference_list), 0)
+        self.assertEqual(len(listing_block.enum_reference_list), 1)
+        self.assertEqual(len(listing_block.asset_reference_list), 0)
+        self.assertIn(text.pk, text_span.text_reference_list)
+        self.assertEqual(len(text_span.text_reference_list), 1)
+        self.assertEqual(len(text_span.uri_reference_list), 0)
+        self.assertEqual(len(text_span.enum_reference_list), 0)
+        self.assertEqual(len(text_span.asset_reference_list), 0)
+        self.assertIn(link_text.pk, link_span.text_reference_list)
+        self.assertIn(link_url.pk, link_span.uri_reference_list)
+        self.assertEqual(len(link_span.text_reference_list), 1)
+        self.assertEqual(len(link_span.uri_reference_list), 1)
+        self.assertEqual(len(link_span.enum_reference_list), 0)
+        self.assertEqual(len(link_span.asset_reference_list), 0)
