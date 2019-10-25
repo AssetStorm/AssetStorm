@@ -153,30 +153,42 @@ def save_asset(request):
         old_asset.save()
         asset = Asset.objects.get(pk=tree["id"])
         asset.revision_chain = old_asset
+        changed = False
         for key in asset.t.schema.keys():
             if key in tree:
                 if asset.t.schema[key] == 1:
                     old_text = Text.objects.get(pk=asset.content_ids[key])
                     if tree[key] != old_text.text:
+                        changed = True
                         asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
                 elif asset.t.schema[key] == 2:
                     old_uri = UriElement.objects.get(pk=asset.content_ids[key])
                     if tree[key] != old_uri.uri:
+                        changed = True
                         asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
                 elif type(asset.t.schema[key]) is dict and \
                         len(asset.t.schema[key].keys()) == 1 and \
                         "3" in asset.t.schema[key].keys():
                     old_enum = Enum.objects.get(pk=asset.content_ids[key])
                     if tree[key] != old_enum.item:
+                        changed = True
                         asset.content_ids[key] = create_asset(tree[key], item_type=asset.t.schema[key])
                 elif type(asset.t.schema[key]) is list:
                     item_ids_list = []
                     for list_item in tree[key]:
                         item_ids_list.append(create_or_modify_asset(list_item, item_type=asset.t.schema[key][0]))
+                    for i, new_item in enumerate(item_ids_list):
+                        if old_asset.content_ids[key][i] != new_item:
+                            changed = True
                     asset.content_ids[key] = item_ids_list
                 else:
                     asset.content_ids[key] = create_or_modify_asset(tree[key], item_type=asset.t.schema[key])
+                    if asset.content_ids[key] != old_asset.content_ids[key]:
+                        changed = True
         asset.save()
+        print(changed)
+        if changed:
+            asset.clear_cache()
         return str(asset.pk)
 
     def create_or_modify_asset(tree, item_type=None):

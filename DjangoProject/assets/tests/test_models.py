@@ -165,3 +165,50 @@ class AssetBasicTestCase(TestCase):
         self.assertIsNotNone(text_span.content_cache)
         self.assertJSONEqual(json.dumps(text_span.content_cache), expected_content)
         self.assertJSONEqual(json.dumps(text_span.content), expected_content)
+
+    def test_clear_cache(self):
+        text = Text(text="cached text")
+        text.save()
+        span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        span.save()
+        block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(span.pk)]})
+        block.save()
+        self.assertIsNone(span.content_cache)
+        self.assertIsNone(block.content_cache)
+        self.assertJSONEqual(json.dumps(span.content), json.dumps({
+            'type': "span-regular",
+            'id': str(span.pk),
+            'text': "cached text"
+        }))
+        self.assertJSONEqual(json.dumps(block.content), json.dumps({
+            'type': "block-paragraph",
+            'id': str(block.pk),
+            'spans': [
+                {'type': "span-regular",
+                 'id': str(span.pk),
+                 'text': "cached text"}
+            ]
+        }))
+        span = Asset.objects.get(pk=span.pk)
+        block = Asset.objects.get(pk=block.pk)
+        self.assertIsNotNone(span.content_cache)
+        self.assertIsNotNone(block.content_cache)
+        span.clear_cache()
+        span = Asset.objects.get(pk=span.pk)
+        block = Asset.objects.get(pk=block.pk)
+        self.assertIsNone(span.content_cache)
+        self.assertIsNone(block.content_cache)
+
+    def test_invalidation_with_query(self):
+        text = Text(text="cached text")
+        text.save()
+        span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        span.save()
+        block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(span.pk)]})
+        block.save()
+        print(json.dumps(block.content, indent=2))
+        print(json.dumps(block.content_ids, indent=2))
+        print("searching for", str(span.pk))
+        print(list(
+            Asset.objects.filter(content_ids__in=str(span.pk))
+        ))

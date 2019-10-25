@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('content_ids', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ('content_cache', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
-                ('invalidation_list', django.contrib.postgres.fields.ArrayField(
+                ('asset_reference_list', django.contrib.postgres.fields.ArrayField(
                     base_field=models.UUIDField(default=uuid.uuid4, editable=False),
                     blank=True, null=True, size=None)),
                 ('t', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assets',
