@@ -73,6 +73,7 @@ class Asset(models.Model):
 
     @property
     def content(self):
+        print("Asset", str(self.pk), "returning cache" if self.content_cache is not None else "calculating content")
         if self.content_cache is not None:
             return self.content_cache
         self.clear_reference_lists()
@@ -97,11 +98,14 @@ class Asset(models.Model):
         return self.content_cache
 
     def clear_cache(self):
+        print("Asset", str(self.pk), "clearing cache... asset_reference_query:",
+              list(Asset.objects.filter(asset_reference_list__contains=[self.pk])))
         for asset in Asset.objects.filter(asset_reference_list__contains=[self.pk]):
             asset.clear_cache()
         self.content_cache = None
         self.clear_reference_lists()
         self.save()
+        print("Asset", str(self.pk), "cache cleared:", self.content_cache)
 
 
 class Text(models.Model):

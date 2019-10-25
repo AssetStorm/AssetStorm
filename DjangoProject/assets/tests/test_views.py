@@ -236,6 +236,7 @@ class TestSaveAsset(TestCase):
         })
         modified_asset = Asset.objects.get(pk=json.loads(response2.content)["id"])
         self.assertEqual(modified_asset.pk, asset.pk)
+        print(json.dumps(modified_asset.content, indent=2))
         self.assertEqual(modified_asset.content["spans"][0]["text"], "This text is changed.")
 
     def test_testilinio(self):

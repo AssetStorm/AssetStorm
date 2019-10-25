@@ -154,7 +154,9 @@ def save_asset(request):
         asset = Asset.objects.get(pk=tree["id"])
         asset.revision_chain = old_asset
         changed = False
+        print("Asset", str(asset.pk), "schema:", asset.t.schema)
         for key in asset.t.schema.keys():
+            print("Asset", str(asset.pk), "processing key", key)
             if key in tree:
                 if asset.t.schema[key] == 1:
                     old_text = Text.objects.get(pk=asset.content_ids[key])
@@ -188,6 +190,7 @@ def save_asset(request):
         asset.save()
         print(changed)
         if changed:
+            print("clearing cache for", str(asset.pk))
             asset.clear_cache()
         return str(asset.pk)
 
