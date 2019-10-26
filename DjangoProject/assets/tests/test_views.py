@@ -201,10 +201,54 @@ class TestSaveAsset(TestCase):
                                     data={"id": "412575db-7407-4de9-936f-050dd7827f59"},
                                     content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.maxDiff = None
         self.assertJSONEqual(response.content, {
             "Error": "An Asset with id 412575db-7407-4de9-936f-050dd7827f59 does not exist.",
             "Asset": {"id": "412575db-7407-4de9-936f-050dd7827f59"}
+        })
+
+    def test_list_instead_of_text(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={
+                "type": "span-link",
+                "link_text": ["foo"],
+                "url": "https://ct.de"
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'span-link' demands the content for key 'link_text' to be a string.",
+            "Asset": {'link_text': ['foo'], 'type': 'span-link', 'url': "https://ct.de"}
+        })
+
+    def test_dict_instead_of_url(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={
+                "type": "span-link",
+                "link_text": "foo",
+                "url": {3: 2}
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'span-link' demands the content for key 'url' to be a string with a URI.",
+            "Asset": {"link_text": "foo", "type": "span-link", "url": {"3": 2}}
+        })
+
+    def test_test_instead_of_asset(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={
+                "type": "block-paragraph",
+                "spans": ["foo"]
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'block-paragraph' demands the content for key 'spans' to be an Asset. " +
+                     "Assets are saved as JSON-objects with an inner structure matching the schema of their type.",
+            "Asset": "foo"
         })
 
     def test_modify_asset(self):

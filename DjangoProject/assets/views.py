@@ -60,7 +60,7 @@ def save_asset(request):
                     "The Schema of AssetType '%s' demands the content for key '%s' to be an Asset." % (
                         asset_type_name,
                         current_key) +
-                    "Assets are saved as JSON-objects with an inner structure matching the schema " +
+                    " Assets are saved as JSON-objects with an inner structure matching the schema " +
                     "of their type.")
 
     def check_asset(tree, expected_asset_type_id=None):
@@ -211,4 +211,17 @@ def save_asset(request):
         return HttpResponseBadRequest(content=json.dumps({
             "Error": str(asset_error),
             "Asset": asset_error.asset
+        }), content_type="application/json")
+
+
+def query(request, query_string=""):
+    try:
+        json_filters = json.loads(request.body, encoding='utf-8')
+        found_texts = Text.objects.filter(text__icontains=query_string)
+        found_assets = Asset.objects.filter(
+            new_version=None).filter(
+            text_reference_list__contains=found_texts)
+    except json.decoder.JSONDecodeError:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "Request not in JSON format. The requests body has to be valid JSON."
         }), content_type="application/json")
