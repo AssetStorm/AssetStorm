@@ -346,6 +346,58 @@ class TestSaveAsset(TestCase):
         self.assertEqual(modified_asset.pk, asset.pk)
         self.assertEqual(modified_asset.content["spans"][0]["text"], "This text is changed.")
 
+    def test_modify_uri(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": [
+                      {"type": "span-link",
+                       "link_text": "Foo",
+                       "url": "https://unittest.com/sGa2Jk3l7fLj"}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": json.loads(response.content)["id"]
+        })
+        asset = Asset.objects.get(pk=json.loads(response.content)["id"])
+        span_link = Asset.objects.get(pk=asset.content_ids["spans"][0])
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"id": str(asset.pk),
+                  "type": "block-paragraph",
+                  "spans": [
+                      {"id": str(span_link.pk),
+                       "url": "https://changed.to/H6Ld5s2pU0"}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(asset.pk)
+        })
+        asset_reloaded = Asset.objects.get(pk=asset.pk)
+        span_link_reloaded = Asset.objects.get(pk=span_link.pk)
+        self.assertJSONEqual(json.dumps(asset_reloaded.content), json.dumps({
+            "type": "block-paragraph",
+            "id": str(asset_reloaded.pk),
+            "spans": [
+                {"id": str(span_link_reloaded.pk),
+                 "type": "span-link",
+                 "link_text": "Foo",
+                 "url": "https://changed.to/H6Ld5s2pU0"}
+            ]
+        }))
+        self.assertIsNotNone(span_link_reloaded.revision_chain)
+        self.assertEqual(UriElement.objects.count(), 2)
+        self.assertEqual(
+            span_link_reloaded.content_ids["url"],
+            UriElement.objects.filter(uri="https://changed.to/H6Ld5s2pU0")[0].pk)
+        self.assertEqual(
+            span_link_reloaded.revision_chain.content_ids["url"],
+            UriElement.objects.filter(uri="https://unittest.com/sGa2Jk3l7fLj")[0].pk)
+
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
             testilinio_tree = json.load(json_file)
