@@ -42,7 +42,9 @@ def save_asset(request):
                     "The Schema of AssetType '%s' demands the content for key '%s' to be a string with a URI." % (
                         asset_type_name,
                         current_key))
-        elif type(expected_type) is dict and len(expected_type.keys()) == 1:
+        elif type(expected_type) is dict and \
+                len(expected_type.keys()) == 1 and \
+                "3" in expected_type.keys():
             enum_type = EnumType.objects.get(pk=expected_type["3"])
             if current_tree[current_key] not in enum_type.items:
                 raise AssetStructureError(
@@ -103,6 +105,13 @@ def save_asset(request):
                                    asset_type.type_name,
                                    key,
                                    list_item)
+                elif type(asset_type.schema[key]) is int and \
+                        asset_type.schema[key] >= 4:
+                    check_type(asset_type.schema[key],
+                               type(tree[key]),
+                               asset_type.type_name,
+                               key,
+                               tree[key])
                 else:
                     check_type(asset_type.schema[key],
                                type(tree[key]),
