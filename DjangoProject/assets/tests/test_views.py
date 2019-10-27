@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
-from assets.models import AssetType, Asset, Text
+from assets.models import AssetType, Asset, Text, UriElement
 import json
 import os
 
@@ -206,6 +206,53 @@ class TestSaveAsset(TestCase):
             "Asset": {"id": "412575db-7407-4de9-936f-050dd7827f59"}
         })
 
+    def test_no_type_in_existing_sub_asset(self):
+        text = Text(text="Foo")
+        text.save()
+        span = Asset(t=AssetType.objects.get(type_name="span-regular"),
+                     content_ids={"text": text.pk})
+        span.save()
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": [
+                      {"id": str(span.pk),
+                       "text": "This is not 'Foo'"}
+                 ]}, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        block = Asset.objects.filter(content_ids__spans=[str(span.pk)])[0]
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(block.pk)
+        })
+
+    def test_illegal_block_in_block(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": [
+                      {"type": "block-paragraph",
+                       "text": "Foo"}
+                  ]}, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "Expected an AssetType with id 4 but got 'block-paragraph' with id 15.",
+            "Asset": {'text': 'Foo', 'type': 'block-paragraph'}
+        })
+
+    def test_no_list_where_the_schema_demands_one(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": {"type": "span-regular",
+                            "text": "Foo"}
+                  }, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'block-paragraph' demands the content for key 'spans' to be a List.",
+            "Asset": {"type": "block-paragraph", "spans": {"type": "span-regular", "text": "Foo"}}
+        })
+
     def test_list_instead_of_text(self):
         response = self.client.post(
             reverse('save_asset'),
@@ -236,7 +283,7 @@ class TestSaveAsset(TestCase):
             "Asset": {"link_text": "foo", "type": "span-link", "url": {"3": 2}}
         })
 
-    def test_test_instead_of_asset(self):
+    def test_list_instead_of_asset(self):
         response = self.client.post(
             reverse('save_asset'),
             data={
@@ -249,6 +296,23 @@ class TestSaveAsset(TestCase):
             "Error": "The Schema of AssetType 'block-paragraph' demands the content for key 'spans' to be an Asset. " +
                      "Assets are saved as JSON-objects with an inner structure matching the schema of their type.",
             "Asset": "foo"
+        })
+
+    def test_create_url(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={
+                "type": "span-link",
+                "link_text": "foo",
+                "url": "https://ct.de/lksadhla"
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 200)
+        uri_object = UriElement.objects.filter(uri="https://ct.de/lksadhla")[0]
+        asset = Asset.objects.get(content_ids__url=uri_object.pk)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(asset.pk)
         })
 
     def test_modify_asset(self):
