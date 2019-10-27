@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
-from assets.models import AssetType, Asset, Text, UriElement
+from assets.models import AssetType, Asset, Text, UriElement, Enum
 import json
 import os
 
@@ -397,6 +397,62 @@ class TestSaveAsset(TestCase):
         self.assertEqual(
             span_link_reloaded.revision_chain.content_ids["url"],
             UriElement.objects.filter(uri="https://unittest.com/sGa2Jk3l7fLj")[0].pk)
+
+    def test_modify_enum(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-info-box",
+                  "title": "Box title",
+                  "content": [
+                      {"type": "block-listing",
+                       "language": "python",
+                       "code": "print(1)"}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": json.loads(response.content)["id"]
+        })
+        box = Asset.objects.get(pk=json.loads(response.content)["id"])
+        block_listing = Asset.objects.get(pk=box.content_ids["content"][0])
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"id": str(box.pk),
+                  "type": "block-info-box",
+                  "title": "Box title",
+                  "content": [
+                      {"id": str(block_listing.pk),
+                       "type": "block-listing",
+                       "language": "kotlin",
+                       "code": "print(1)"}
+                  ]},
+            content_type="application/json")
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(box.pk)
+        })
+        box_reloaded = Asset.objects.get(pk=box.pk)
+        block_listing_reloaded = Asset.objects.get(pk=block_listing.pk)
+        self.assertJSONEqual(json.dumps(box_reloaded.content), json.dumps({
+            "id": str(box_reloaded.pk),
+            "type": "block-info-box",
+            "title": "Box title",
+            "content": [
+                {"id": str(block_listing_reloaded.pk),
+                 "type": "block-listing",
+                 "language": "kotlin",
+                 "code": "print(1)"}
+            ]
+        }))
+        self.assertIsNotNone(block_listing_reloaded.revision_chain)
+        self.assertEqual(Enum.objects.count(), 2)
+        self.assertEqual(
+            block_listing_reloaded.content_ids["language"],
+            Enum.objects.filter(item="kotlin")[0].pk)
+        self.assertEqual(
+            block_listing_reloaded.revision_chain.content_ids["language"],
+            Enum.objects.filter(item="python")[0].pk)
 
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
