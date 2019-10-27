@@ -218,7 +218,7 @@ class TestSaveAsset(TestCase):
                   "spans": [
                       {"id": str(span.pk),
                        "text": "This is not 'Foo'"}
-                 ]}, content_type="application/json")
+                  ]}, content_type="application/json")
         self.assertEqual(response.status_code, 200)
         block = Asset.objects.filter(content_ids__spans=[str(span.pk)])[0]
         self.assertJSONEqual(response.content, {
@@ -344,6 +344,11 @@ class TestSaveAsset(TestCase):
         })
         modified_asset = Asset.objects.get(pk=json.loads(response2.content)["id"])
         self.assertEqual(modified_asset.pk, asset.pk)
+        modified_span = Asset.objects.get(pk=modified_asset.content_ids["spans"][0])
+        modified_text = Text.objects.get(text="This text is changed.")
+        self.assertEqual(modified_span.content_ids["text"], modified_text.pk)
+        self.assertEqual(modified_asset.content_ids["spans"][0],
+                         str(modified_span.pk))
         self.assertEqual(modified_asset.content["spans"][0]["text"], "This text is changed.")
 
     def test_modify_uri(self):
@@ -453,6 +458,66 @@ class TestSaveAsset(TestCase):
         self.assertEqual(
             block_listing_reloaded.revision_chain.content_ids["language"],
             Enum.objects.filter(item="python")[0].pk)
+
+    def test_modify_list_order(self):
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-paragraph",
+                  "spans": [
+                      {"type": "span-regular", "text": "a"},
+                      {"type": "span-regular", "text": "b"}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": json.loads(response.content)["id"]
+        })
+        asset = Asset.objects.get(pk=json.loads(response.content)["id"])
+        self.assertJSONEqual(json.dumps(asset.content), json.dumps({
+            "id": str(asset.pk),
+            "type": "block-paragraph",
+            "spans": [
+                {"id": str(asset.content_ids["spans"][0]), "type": "span-regular", "text": "a"},
+                {"id": str(asset.content_ids["spans"][1]), "type": "span-regular", "text": "b"}
+            ]
+        }))
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"id": str(asset.pk),
+                  "type": "block-paragraph",
+                  "spans": [
+                      {"id": str(asset.content_ids["spans"][1])},
+                      {"id": str(asset.content_ids["spans"][0])}
+                  ]},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(asset.pk)
+        })
+        asset_reloaded = Asset.objects.get(pk=asset.pk)
+        self.assertJSONEqual(json.dumps(asset_reloaded.content), json.dumps({
+            "id": str(asset_reloaded.pk),
+            "type": "block-paragraph",
+            "spans": [
+                {"id": str(asset_reloaded.content_ids["spans"][0]), "type": "span-regular", "text": "b"},
+                {"id": str(asset_reloaded.content_ids["spans"][1]), "type": "span-regular", "text": "a"}
+            ]
+        }))
+        self.assertIsNotNone(asset_reloaded.revision_chain)
+        a = Asset.objects.get(
+            new_version=None,
+            content_ids__text=Text.objects.get(text="a").pk)
+        self.assertIsNone(a.revision_chain)
+        b = Asset.objects.get(
+            new_version=None,
+            content_ids__text=Text.objects.get(text="b").pk)
+        self.assertIsNone(a.revision_chain)
+        self.assertEqual(asset_reloaded.content_ids["spans"][0], str(b.pk))
+        self.assertEqual(asset_reloaded.content_ids["spans"][1], str(a.pk))
+        self.assertEqual(asset_reloaded.revision_chain.content_ids["spans"][0], str(a.pk))
+        self.assertEqual(asset_reloaded.revision_chain.content_ids["spans"][1], str(b.pk))
 
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:

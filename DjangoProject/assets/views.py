@@ -153,6 +153,8 @@ def save_asset(request):
         old_asset.save()
         asset = Asset.objects.get(pk=tree["id"])
         asset.revision_chain = old_asset
+        asset.content_cache = None
+        asset.clear_reference_lists()
         asset.save()
         changed = False
         for key in asset.t.schema.keys():
@@ -188,6 +190,10 @@ def save_asset(request):
                         changed = True
         if changed:
             asset.clear_cache()
+        else:
+            asset.revision_chain = old_asset.revision_chain
+            asset.save()
+            old_asset.delete()
         return str(asset.pk)
 
     def create_or_modify_asset(tree, item_type=None):
