@@ -519,6 +519,84 @@ class TestSaveAsset(TestCase):
         self.assertEqual(asset_reloaded.revision_chain.content_ids["spans"][0], str(a.pk))
         self.assertEqual(asset_reloaded.revision_chain.content_ids["spans"][1], str(b.pk))
 
+    def test_listless_sub_asset_change(self):
+        block_singleblock = AssetType(type_name="block-singleblock", schema={"block": 5},
+                                      parent_type=AssetType.objects.get(type_name="block"))
+        block_singleblock.save()
+        response = self.client.post(
+            reverse('save_asset'),
+            data={"type": "block-singleblock",
+                  "block": {
+                      "type": "block-listing",
+                      "language": "python",
+                      "code": "print(1)"}},
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": json.loads(response.content)["id"]
+        })
+        asset = Asset.objects.get(pk=json.loads(response.content)["id"])
+        self.assertEqual(asset.t, block_singleblock)
+        self.assertJSONEqual(json.dumps(asset.content), json.dumps({
+            "id": str(asset.pk),
+            "type": "block-singleblock",
+            "block": {
+                "id": asset.content_ids["block"],
+                "type": "block-listing",
+                "language": "python",
+                "code": "print(1)"}
+        }))
+        tree = asset.content.copy()
+        tree["block"]["language"] = "kotlin"
+        response = self.client.post(
+            reverse('save_asset'),
+            data=tree,
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(asset.pk)
+        })
+        asset_reloaded = Asset.objects.get(pk=asset.pk)
+        listing_block = Asset.objects.get(pk=asset_reloaded.content_ids["block"])
+        self.assertJSONEqual(json.dumps(asset_reloaded.content), json.dumps({
+            "type": "block-singleblock",
+            "id": str(asset_reloaded.pk),
+            "block": {
+                "type": "block-listing",
+                "id": str(listing_block.pk),
+                "code": "print(1)",
+                "language": "kotlin"}}))
+        self.assertIsNone(asset_reloaded.revision_chain)
+        self.assertIsNotNone(listing_block.revision_chain)
+        self.assertEqual(listing_block.content_ids["language"], Enum.objects.get(item="kotlin").pk)
+        tree["block"] = {"type": "block-paragraph", "spans": [
+            {"type": "span-regular", "text": "Foobar Baz!"}
+        ]}
+        response = self.client.post(
+            reverse('save_asset'),
+            data=tree,
+            content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "Success": True,
+            "id": str(asset.pk)
+        })
+        asset_reloaded2 = Asset.objects.get(pk=asset.pk)
+        paragraph_block = Asset.objects.get(pk=asset_reloaded2.content_ids["block"])
+        self.assertIsNotNone(asset_reloaded2.revision_chain)
+        self.assertJSONEqual(json.dumps(asset_reloaded2.content), json.dumps({
+            "id": str(asset_reloaded2.pk),
+            "type": "block-singleblock",
+            "block": {
+                "id": str(paragraph_block.pk),
+                "type": "block-paragraph",
+                "spans": [{"id": paragraph_block.content_ids["spans"][0],
+                           "type": "span-regular",
+                           "text": "Foobar Baz!"}]}
+        }))
+
     def test_testilinio(self):
         with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
             testilinio_tree = json.load(json_file)
