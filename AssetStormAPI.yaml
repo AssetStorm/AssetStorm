@@ -1,0 +1,183 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AssetStorm
+  license:
+    name: GPLv3
+servers:
+  - url: http://assetstorm.pinae.net
+paths:
+  /:
+    get:
+      tags:
+        - asset
+      parameters:
+        - $ref: "#/paths/~1load/get/parameters/0"
+      responses:
+        '200':
+          $ref: "#/paths/~1load/get/responses/200"
+        default:
+          $ref: "#/paths/~1load/get/responses/default"
+    post:
+      tags:
+        - asset
+      requestBody:
+        $ref: "#/paths/~1save/post/requestBody"
+      responses:
+        '200':
+          $ref: "#/paths/~1save/post/responses/200"
+        default:
+          $ref: "#/paths/~1save/post/responses/default"
+  /load:
+    get:
+      summary: Load one asset by ID
+      operationId: load_asset
+      tags:
+        - asset
+      parameters:
+        - name: id
+          in: query
+          description: ID as a UUIDv4 string identifying the desired asset
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Returns the content tree of the requested asset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetTree"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /save:
+    post:
+      summary: Create or modify all assets from the supplied tree
+      operationId: save_asset
+      tags:
+        - asset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetTree"
+      responses:
+        '200':
+          description: Returns a boolean und the ID of the asset on the top level.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /find:
+    get:
+      summary: Query for assets only with filters
+      operationId: find_asset_filter_only
+      tags:
+        - asset
+      requestBody:
+        $ref: "#/paths/~1find~1%7BsearchString%7D/get/requestBody"
+      responses:
+        '200':
+          $ref: "#/paths/~1find~1%7BsearchString%7D/get/responses/200"
+        default:
+          $ref: "#/paths/~1find~1%7BsearchString%7D/get/responses/default"
+  /find/{searchString}:
+    get:
+      summary: Query for assets with a search string and filters
+      operationId: find_asset
+      tags:
+        - asset
+      parameters:
+        - name: searchString
+          in: path
+          required: true
+          description: The search string may be empty
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchFilters"
+      responses:
+        '200':
+          description: Returns the IDs of the requested assets.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryResponse"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - Error
+        - Asset
+      properties:
+        Error:
+          type: string
+        Asset:
+          type: object
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - id
+      properties:
+        success:
+          type: boolean
+        id:
+          type: string
+          format: uuid
+    SearchFilters:
+      type: object
+    QueryResponse:
+      type: object
+      required:
+        - success
+        - foundAssetIDs
+      properties:
+        success:
+          type: boolean
+        foundAssetIDs:
+          type: array
+          items:
+            type: string
+            format: uuid
+    AssetTree:
+      type: object
+      anyOf:
+        - required:
+            - id
+        - required:
+            - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+      additionalProperties:
+        oneOf:
+          - type: string
+          - $ref: "#/components/schemas/AssetTree"
+          - type: array
+            items:
+              $ref: "#/components/schemas/AssetTree"
