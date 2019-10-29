@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from assets.views import load_asset, save_asset
+from assets.views import load_asset, save_asset, turnout, query
 
 urlpatterns = [
+    path('', turnout, name="turnout_request"),
     path('load', load_asset, name="load_asset"),
     path('save', save_asset, name="save_asset"),
+    path('find', query, name="find_asset"),
 ]

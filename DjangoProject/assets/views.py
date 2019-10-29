@@ -122,8 +122,8 @@ def save_asset(request):
             raise AssetStructureError(tree, "Missing key in Asset: " + str(err))
         except AssetType.DoesNotExist:
             raise AssetStructureError(tree, "Unknown AssetType: " + tree["type"])
-        except Enum.DoesNotExist:
-            raise AssetStructureError(tree, "Unknown Enum: " + str(tree[key]))
+        except EnumType.DoesNotExist:
+            raise AssetStructureError(tree, "Unknown EnumType: %s." % str(tree[key]))
         except Asset.DoesNotExist:
             raise AssetStructureError(tree, "An Asset with id %s does not exist." % tree["id"])
 
@@ -215,7 +215,7 @@ def save_asset(request):
         check_asset(full_tree)
         asset_pk = create_or_modify_asset(full_tree)
         return HttpResponse(content=json.dumps({
-            "Success": True,
+            "success": True,
             "id": asset_pk
         }), content_type="application/json")
     except json.decoder.JSONDecodeError:
@@ -227,6 +227,13 @@ def save_asset(request):
             "Error": str(asset_error),
             "Asset": asset_error.asset
         }), content_type="application/json")
+
+
+def turnout(request):
+    if request.method == 'GET':
+        return load_asset(request)
+    if request.method == 'POST':
+        return save_asset(request)
 
 
 def query(request, query_string=""):

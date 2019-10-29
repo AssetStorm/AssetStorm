@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
-from assets.models import AssetType, Asset, Text, UriElement, Enum
+from assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
 import json
 import os
 
@@ -222,7 +222,7 @@ class TestSaveAsset(TestCase):
         self.assertEqual(response.status_code, 200)
         block = Asset.objects.filter(content_ids__spans=[str(span.pk)])[0]
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(block.pk)
         })
 
@@ -311,8 +311,43 @@ class TestSaveAsset(TestCase):
         uri_object = UriElement.objects.filter(uri="https://ct.de/lksadhla")[0]
         asset = Asset.objects.get(content_ids__url=uri_object.pk)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
+        })
+
+    def test_unknown_enum_type(self):
+        enum_test_asset_type = AssetType(type_name="enum-test", schema={
+            "enum": {"3": 3}
+        })
+        enum_test_asset_type.save()
+        response = self.client.post(reverse('save_asset'), data={
+                "type": "enum-test",
+                "enum": "tuiornuidtaeosuien"
+            }, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "Unknown EnumType: tuiornuidtaeosuien.",
+            "Asset": {"type": "enum-test",
+                      "enum": "tuiornuidtaeosuien"}
+        })
+
+    def test_unknown_enum(self):
+        enum_test_type = EnumType(items=["a", "b", "c"])
+        enum_test_type.save()
+        enum_test_asset_type = AssetType(type_name="enum-test", schema={
+            "enum": {"3": enum_test_type.pk}
+        })
+        enum_test_asset_type.save()
+        response = self.client.post(reverse('save_asset'), data={
+                "type": "enum-test",
+                "enum": "d"
+            }, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {
+            "Error": "The Schema of AssetType 'enum-test' demands the content for key 'enum' " +
+                     "to be the enum_type with id=%d." % enum_test_type.pk,
+            "Asset": {"type": "enum-test",
+                      "enum": "d"}
         })
 
     def test_modify_asset(self):
@@ -326,7 +361,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": json.loads(response.content)["id"]
         })
         asset = Asset.objects.get(pk=json.loads(response.content)["id"])
@@ -339,7 +374,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response2.status_code, 200)
         self.assertJSONEqual(response2.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
         })
         modified_asset = Asset.objects.get(pk=json.loads(response2.content)["id"])
@@ -363,7 +398,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": json.loads(response.content)["id"]
         })
         asset = Asset.objects.get(pk=json.loads(response.content)["id"])
@@ -379,7 +414,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
         })
         asset_reloaded = Asset.objects.get(pk=asset.pk)
@@ -416,7 +451,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": json.loads(response.content)["id"]
         })
         box = Asset.objects.get(pk=json.loads(response.content)["id"])
@@ -434,7 +469,7 @@ class TestSaveAsset(TestCase):
                   ]},
             content_type="application/json")
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(box.pk)
         })
         box_reloaded = Asset.objects.get(pk=box.pk)
@@ -470,7 +505,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": json.loads(response.content)["id"]
         })
         asset = Asset.objects.get(pk=json.loads(response.content)["id"])
@@ -493,7 +528,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
         })
         asset_reloaded = Asset.objects.get(pk=asset.pk)
@@ -533,7 +568,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": json.loads(response.content)["id"]
         })
         asset = Asset.objects.get(pk=json.loads(response.content)["id"])
@@ -555,7 +590,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
         })
         asset_reloaded = Asset.objects.get(pk=asset.pk)
@@ -580,7 +615,7 @@ class TestSaveAsset(TestCase):
             content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(asset.pk)
         })
         asset_reloaded2 = Asset.objects.get(pk=asset.pk)
@@ -607,7 +642,7 @@ class TestSaveAsset(TestCase):
         title = Text.objects.get(text="Testilinio")
         article_asset = Asset.objects.get(content_ids__title=title.pk)
         self.assertJSONEqual(response.content, {
-            "Success": True,
+            "success": True,
             "id": str(article_asset.pk)
         })
         check_tree = testilinio_tree.copy()
@@ -620,3 +655,54 @@ class TestSaveAsset(TestCase):
                     check_tree["content"][i]["spans"][j]["id"] = str(span_asset.pk)
             check_tree["content"][i]["id"] = str(block_asset.pk)
         self.assertJSONEqual(json.dumps(article_asset.content), json.dumps(check_tree))
+
+
+class TestTurnoutView(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_load(self):
+        code = Text(text="print(1)")
+        code.save()
+        lang_python = Enum(t=EnumType.objects.get(pk=2), item="python")
+        lang_python.save()
+        listing_block = Asset(t=AssetType.objects.get(type_name="block-listing"), content_ids={
+            "code": code.pk,
+            "language": lang_python.pk
+        })
+        listing_block.save()
+        response = self.client.get(reverse('turnout_request'), {'id': str(listing_block.pk)})
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, json.dumps({
+            "id": str(listing_block.pk),
+            "type": "block-listing",
+            "code": "print(1)",
+            "language": "python"
+        }))
+
+    def test_save(self):
+        response = self.client.post(reverse('turnout_request'), data={
+            "type": "block-listing",
+            "code": "print(1)",
+            "language": "python"
+        }, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        saved_asset = Asset.objects.get(pk=json.loads(response.content)["id"])
+        self.assertJSONEqual(response.content, json.dumps({
+            "success": True,
+            "id": str(saved_asset.pk)
+        }))
+        self.assertJSONEqual(json.dumps(saved_asset.content), json.dumps({
+            "id": str(saved_asset.pk),
+            "type": "block-listing",
+            "code": "print(1)",
+            "language": "python"
+        }))
