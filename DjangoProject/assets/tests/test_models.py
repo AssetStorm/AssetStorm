@@ -302,6 +302,17 @@ class RawTemplateTests(TestCase):
         'enum_types.yaml'
     ]
 
+    def test_no_raw_template(self):
+        insufficient_type = AssetType(type_name="insufficient_type", schema={"text": 1}, templates={})
+        insufficient_type.save()
+        t = Text(text="Foobar!")
+        t.save()
+        asset = Asset(t=insufficient_type, content_ids={
+            "text": t.pk
+        })
+        asset.save()
+        self.assertEqual(asset.render_template(), "")
+
     def test_basic_template(self):
         statement = Text(text="Vertrauen ist gut. Kontrolle ist besser.")
         statement.save()

@@ -117,6 +117,8 @@ class Asset(models.Model):
                 return Enum.objects.get(pk=pk).item
             return Asset.objects.get(pk=pk).render_template(template_key=template_key)
 
+        if template_key not in self.t.templates.keys():
+            return ""
         if template_key == "raw":
             if self.raw_content_cache is not None:
                 return self.raw_content_cache
