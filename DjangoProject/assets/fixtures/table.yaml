@@ -12,63 +12,85 @@
     type_name: table-row-heading
     parent_type: 35
     schema: {"heading_cells": [36]}
+    templates:
+      raw: "{{for(heading_cells)}}{{heading_cells}} {{endfor}}"
 - model: assets.AssetType
   pk: 38
   fields:
     type_name: table-row-regular
     parent_type: 35
     schema: {"cells": [36]}
+    templates:
+      raw: "{{for(cells)}}{{cells}} {{endfor}}"
 - model: assets.AssetType
   pk: 39
   fields:
     type_name: table-row-fullwidth
     parent_type: 35
     schema: {"content": 36}
+    templates:
+      raw: "{{content}}"
 - model: assets.AssetType
   pk: 40
   fields:
     type_name: table-cell-text
     parent_type: 36
     schema: {"content": 1}
+    templates:
+      raw: "{{content}}"
 - model: assets.AssetType
   pk: 41
   fields:
     type_name: table-cell-rating
     parent_type: 36
     schema: {"content": {3: 1}}
+    templates:
+      raw: "{{content}}"
 - model: assets.AssetType
   pk: 42
   fields:
     type_name: table-cell-link
     parent_type: 36
     schema: {"content": 11}
+    templates:
+      raw: "{{content}}"
 - model: assets.AssetType
   pk: 43
   fields:
     type_name: table-cell-value
     parent_type: 36
     schema: {"value": 1}
+    templates:
+      raw: "{{content}}"
 - model: assets.AssetType
   pk: 44
   fields:
     type_name: table-cell-bar
     parent_type: 36
     schema: {"min": 1, "max": 1, "value": 1}
+    templates:
+      raw: "{{value}} ({{min}} - {{max}})"
 - model: assets.AssetType
   pk: 45
   fields:
     type_name: table-cell-double-bar
     parent_type: 36
     schema: {"min1": 1, "max1": 1, "value1": 1, "min2": 1, "max2": 1, "value2": 1}
+    templates:
+      raw: "{{value1}} ({{min1}} - {{max1}})\n{{value2}} ({{min2}} - {{max2}})"
 - model: assets.AssetType
   pk: 46
   fields:
     type_name: table-cell-multi
     parent_type: 36
     schema: {"spans": [36]}
+    templates:
+      raw: "{{for(spans)}}{{spans}}{{endfor}}"
 - model: assets.AssetType
   pk: 47
   fields:
     type_name: block-table
     parent_type: 5
     schema: {"title": 1, "rows": [35]}
+    templates:
+      raw: "{{title}}\n\n{{for(rows)}}{{rows}}\n{{endfor}}\n\n"

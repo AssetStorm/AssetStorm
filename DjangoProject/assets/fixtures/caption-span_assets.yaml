@@ -8,21 +8,29 @@
     type_name: caption-span-regular
     parent_type: 16
     schema: {"text": 1}
+    templates:
+      raw: "{{text}}"
 - model: assets.AssetType
   pk: 18
   fields:
     type_name: caption-span-emphasized
     parent_type: 16
     schema: {"text": 1}
+    templates:
+      raw: "{{text}}"
 - model: assets.AssetType
   pk: 19
   fields:
     type_name: caption-span-strong
     parent_type: 16
     schema: {"text": 1}
+    templates:
+      raw: "{{text}}"
 - model: assets.AssetType
   pk: 20
   fields:
     type_name: caption-span-link
     parent_type: 16
     schema: {"link_text": 1, "url": 2}
+    templates:
+      raw: "{{link_text}}"

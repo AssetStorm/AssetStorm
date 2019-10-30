@@ -455,4 +455,54 @@ class RawTemplateTests(TestCase):
             "spans": [str(a1.pk), str(a2.pk)]
         })
         p.save()
-        self.assertEqual(p.render_template(), "Foo \nBar\n\n")
+        self.assertEqual(p.render_template(), "Foo Bar\n\n")
+
+    def test_block_image_raw_template(self):
+        img_uri = UriElement(uri="/foo/bar.jpg")
+        img_uri.save()
+        alt_text = Text(text="An image of a bar.")
+        alt_text.save()
+        caption_text1 = Text(text="This bar is an ")
+        caption_text1.save()
+        caption_text2 = Text(text="example")
+        caption_text2.save()
+        caption_text3 = Text(text=" of foo.")
+        caption_text3.save()
+        caption_span1 = Asset(t=AssetType.objects.get(type_name="caption-span-regular"),
+                              content_ids={"text": caption_text1.pk})
+        caption_span1.save()
+        caption_span2 = Asset(t=AssetType.objects.get(type_name="caption-span-emphasized"),
+                              content_ids={"text": caption_text2.pk})
+        caption_span2.save()
+        caption_span3 = Asset(t=AssetType.objects.get(type_name="caption-span-regular"),
+                              content_ids={"text": caption_text3.pk})
+        caption_span3.save()
+        img = Asset(t=AssetType.objects.get(type_name="block-image"), content_ids={
+            "image_uri": img_uri.pk,
+            "alt": alt_text.pk,
+            "caption": [str(caption_span1.pk), str(caption_span2.pk), str(caption_span3.pk)]
+        })
+        img.save()
+        self.assertEqual(img.render_template(),
+                         "img (/foo/bar.jpg): An image of a bar.\n\nThis bar is an example of foo.\n")
+
+    def test_block_info_box_raw_template(self):
+        t1 = Text(text="Foo ")
+        t1.save()
+        t2 = Text(text="Bar")
+        t2.save()
+        s1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
+        s1.save()
+        s2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
+        s2.save()
+        p1 = Asset(t=AssetType.objects.get(type_name="block-paragraph"),
+                   content_ids={"spans": [str(s1.pk), str(s2.pk)]})
+        p1.save()
+        p2 = Asset(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={"spans": [str(s2.pk)]})
+        p2.save()
+        box = Asset(t=AssetType.objects.get(type_name="block-info-box"), content_ids={
+            "title": t2.pk,
+            "content": [str(p1.pk), str(p2.pk)]
+        })
+        box.save()
+        self.assertEqual(box.render_template(), "Bar\n\nFoo Bar\n\nBar\n\n")
