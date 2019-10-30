@@ -8,6 +8,10 @@
     type_name: block-paragraph
     parent_type: 5
     schema: {"spans": [4]}
+    templates:
+      raw: |
+        {{for(spans)}}{{spans}}
+        {{endfor}}
 - model: assets.AssetType
   pk: 21
   fields:
@@ -32,6 +36,10 @@
     type_name: block-citation
     parent_type: 5
     schema: {"statement": 1, "attribution": 1}
+    templates:
+      raw: |
+        {{statement}}
+         - {{attribution}}
 - model: assets.AssetType
   pk: 25
   fields:

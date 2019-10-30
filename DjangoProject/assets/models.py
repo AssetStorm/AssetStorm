@@ -2,12 +2,14 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 import uuid
+import re
 
 
 class AssetType(models.Model):
     type_name = models.CharField(unique=True, max_length=128)
     parent_type = models.ForeignKey('self', related_name="children", on_delete=models.SET_NULL, blank=True, null=True)
     schema = JSONField(blank=True, null=True)
+    templates = JSONField(default=dict)
 
     def __str__(self):
         schema_str = "?" if self.schema is None else "!"
@@ -30,6 +32,7 @@ class Asset(models.Model):
         models.UUIDField(default=uuid.uuid4, editable=False, blank=False, null=False), default=list)
     revision_chain = models.ForeignKey("self", on_delete=models.SET_NULL,
                                        related_name="new_version", blank=True, null=True)
+    raw_content_cache = models.TextField(null=True, default=None)
 
     def clear_reference_lists(self):
         self.text_reference_list.clear()
@@ -62,7 +65,7 @@ class Asset(models.Model):
             uri_element = UriElement.objects.get(pk=content_id)
             self.register_reference_to_uri(uri_element)
             return uri_element.uri
-        elif content_type == 3:  # enum
+        elif type(content_type) is dict and "3" in content_type:  # enum
             enum = Enum.objects.get(pk=content_id)
             self.register_reference_to_enum(enum)
             return enum.item
@@ -89,7 +92,7 @@ class Asset(models.Model):
             elif type(self.t.schema[k]) is dict and \
                     len(self.t.schema[k].keys()) == 1 and \
                     "3" in self.t.schema[k].keys():
-                asset_content = self.get_asset_content(3, self.content_ids[k])
+                asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             else:
                 asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
             self.content_cache[k] = asset_content
@@ -100,8 +103,52 @@ class Asset(models.Model):
         for asset in Asset.objects.filter(asset_reference_list__contains=[self.pk]):
             asset.clear_cache()
         self.content_cache = None
+        self.raw_content_cache = None
         self.clear_reference_lists()
         self.save()
+
+    def render_template(self, template_key="raw"):
+        def get_key_content(type_id, pk):
+            if type_id == 1:
+                return Text.objects.get(pk=pk).text
+            if type_id == 2:
+                return UriElement.objects.get(pk=pk).uri
+            if type(type_id) is dict and "3" in type_id:
+                return Enum.objects.get(pk=pk).item
+            return Asset.objects.get(pk=pk).render_template(template_key=template_key)
+
+        if template_key == "raw":
+            if self.raw_content_cache is not None:
+                return self.raw_content_cache
+        consumable_template = self.t.templates[template_key]
+        for key in self.t.schema.keys():
+            key_list_regex = r"^(?P<start_part>[\s\S]*?){{for\(" + key + \
+                             r"\)}}(?P<list_template>[\s\S]*?){{endfor}}(?P<end_part>[\s\S]*)"
+            key_regex = r"^(?P<start_part>[\s\S]*?){{" + key + r"}}(?P<end_part>[\s\S]*)"
+            list_matches = re.match(key_list_regex, consumable_template, re.MULTILINE)
+            while list_matches and type(self.t.schema[key]) is list:
+                list_content = ""
+                for pk in self.content_ids[key]:
+                    consumable_list_template = list_matches.groupdict()["list_template"]
+                    matches = re.match(key_regex, consumable_list_template, re.MULTILINE)
+                    while matches:
+                        consumable_list_template = matches.groupdict()["start_part"] + get_key_content(
+                            self.t.schema[key][0], pk) + matches.groupdict()["end_part"]
+                        matches = re.match(key_regex, consumable_list_template, re.MULTILINE)
+                    list_content += consumable_list_template
+                consumable_template = list_matches.groupdict()["start_part"] + \
+                    list_content + \
+                    list_matches.groupdict()["end_part"]
+                list_matches = re.match(key_list_regex, consumable_template, re.MULTILINE)
+            matches = re.match(key_regex, consumable_template, re.MULTILINE)
+            while matches:
+                consumable_template = matches.groupdict()["start_part"] + get_key_content(
+                    self.t.schema[key], self.content_ids[key]) + matches.groupdict()["end_part"]
+                matches = re.match(key_regex, consumable_template, re.MULTILINE)
+        if template_key == "raw":
+            self.raw_content_cache = consumable_template
+            self.save()
+        return consumable_template
 
 
 class Text(models.Model):

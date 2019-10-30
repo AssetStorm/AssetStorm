@@ -291,3 +291,168 @@ class AssetBasicTestCase(TestCase):
         self.assertEqual(len(link_span.uri_reference_list), 1)
         self.assertEqual(len(link_span.enum_reference_list), 0)
         self.assertEqual(len(link_span.asset_reference_list), 0)
+
+
+class RawTemplateTests(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def test_basic_template(self):
+        statement = Text(text="Vertrauen ist gut. Kontrolle ist besser.")
+        statement.save()
+        attribution = Text(text="Lenin")
+        attribution.save()
+        asset = Asset(t=AssetType.objects.get(type_name="block-citation"), content_ids={
+            "statement": statement.pk, "attribution": attribution.pk
+        })
+        asset.save()
+        self.assertEqual(asset.render_template(), "Vertrauen ist gut. Kontrolle ist besser.\n - Lenin\n")
+
+    def test_text_list_template(self):
+        ul = AssetType(type_name="ul", schema={"texts": [1]}, templates={
+            "raw": "{{for(texts)}} - {{texts}}\n{{endfor}}",
+            "html": "<ul>{{for(texts)}}\n  <li>{{texts}}</li>{{endfor}}\n</ul>"
+        })
+        ul.save()
+        t1 = Text(text="Foo")
+        t1.save()
+        t2 = Text(text="Bar")
+        t2.save()
+        t3 = Text(text="Baz")
+        t3.save()
+        asset = Asset(t=ul, content_ids={"texts": [t1.pk, t2.pk, t3.pk]})
+        asset.save()
+        self.assertEqual(asset.render_template("html"), "<ul>\n  <li>Foo</li>\n  <li>Bar</li>\n  <li>Baz</li>\n</ul>")
+        self.assertEqual(asset.render_template(), " - Foo\n - Bar\n - Baz\n")
+
+    def test_asset_all_types_template(self):
+        all_type = AssetType(type_name="all_type", schema={
+            "text": 1,
+            "url": 2,
+            "enum": {"3": 2},
+            "asset": 4,
+            "texts": [1],
+            "urls": [2],
+            "enums": [{"3": 2}],
+            "assets": [4]
+        }, templates={
+            "raw": """
+            text: {{text}}
+            url: {{url}}
+            enum: {{enum}}
+            asset: {{asset}}
+            texts:{{for(texts)}}
+             - {{texts}}{{endfor}}
+            urls:{{for(urls)}}
+             - {{urls}}{{endfor}}
+            enums:{{for(enums)}}
+             - {{enums}}{{endfor}}
+            assets:{{for(assets)}}
+             - {{assets}}{{endfor}}
+            """
+        })
+        all_type.save()
+        t1 = Text(text="Foo")
+        t1.save()
+        t2 = Text(text="Bar")
+        t2.save()
+        l1 = UriElement(uri="http://ct.de/a")
+        l1.save()
+        l2 = UriElement(uri="http://ct.de/b")
+        l2.save()
+        e1 = Enum(t=EnumType.objects.get(pk=2), item="python")
+        e1.save()
+        e2 = Enum(t=EnumType.objects.get(pk=2), item="c")
+        e2.save()
+        e3 = Enum(t=EnumType.objects.get(pk=2), item="d")
+        e3.save()
+        a1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t2.pk})
+        a1.save()
+        a2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t1.pk})
+        a2.save()
+        asset = Asset(t=all_type, content_ids={
+            "text": t1.pk,
+            "url": l1.pk,
+            "enum": e1.pk,
+            "asset": str(a1.pk),
+            "texts": [t1.pk, t2.pk],
+            "urls": [l1.pk, l2.pk],
+            "enums": [e1.pk, e2.pk, e3.pk],
+            "assets": [str(a1.pk), str(a2.pk)]
+        })
+        asset.save()
+        self.maxDiff = None
+        self.assertJSONEqual(json.dumps(asset.content), json.dumps({
+            "id": str(asset.pk),
+            "type": "all_type",
+            "text": "Foo",
+            "url": "http://ct.de/a",
+            "enum": "python",
+            "asset": {"id": str(a1.pk), "type": "span-regular", "text": "Bar"},
+            "texts": ["Foo", "Bar"],
+            "urls": ["http://ct.de/a", "http://ct.de/b"],
+            "enums": ["python", "c", "d"],
+            "assets": [
+                {"id": str(a1.pk), "type": "span-regular", "text": "Bar"},
+                {"id": str(a2.pk), "type": "span-emphasized", "text": "Foo"}]
+        }))
+        self.assertIsNone(asset.raw_content_cache)
+        self.assertEqual(asset.render_template(), """
+            text: Foo
+            url: http://ct.de/a
+            enum: python
+            asset: Bar
+            texts:
+             - Foo
+             - Bar
+            urls:
+             - http://ct.de/a
+             - http://ct.de/b
+            enums:
+             - python
+             - c
+             - d
+            assets:
+             - Bar
+             - Foo
+            """)
+        self.assertIsNotNone(asset.raw_content_cache)
+        self.assertEqual(asset.render_template(), """
+            text: Foo
+            url: http://ct.de/a
+            enum: python
+            asset: Bar
+            texts:
+             - Foo
+             - Bar
+            urls:
+             - http://ct.de/a
+             - http://ct.de/b
+            enums:
+             - python
+             - c
+             - d
+            assets:
+             - Bar
+             - Foo
+            """)
+
+    def test_block_paragraph_raw_template(self):
+        t1 = Text(text="Foo ")
+        t1.save()
+        t2 = Text(text="Bar")
+        t2.save()
+        a1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
+        a1.save()
+        a2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
+        a2.save()
+        p = Asset(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={
+            "spans": [str(a1.pk), str(a2.pk)]
+        })
+        p.save()
+        self.assertEqual(p.render_template(), "Foo \nBar\n\n")
