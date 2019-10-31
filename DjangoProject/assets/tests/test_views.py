@@ -706,3 +706,32 @@ class TestTurnoutView(TestCase):
             "code": "print(1)",
             "language": "python"
         }))
+
+class TestQueryView(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_filter_not_json(self):
+        response = self.client.post(
+            reverse("find_assets", args={"query_string": "foo"}),
+            data="{argh: 2]", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content), {
+            "Error": "Request not in JSON format. The request body has to be valid JSON."
+        })
+
+    def test_filter_empty(self):
+        response = self.client.post(
+            reverse("filter_assets"),
+            data=None, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+
+

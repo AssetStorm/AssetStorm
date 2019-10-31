@@ -238,12 +238,15 @@ def turnout(request):
 
 def query(request, query_string=""):
     try:
-        json_filters = json.loads(request.body, encoding='utf-8')
-        found_texts = Text.objects.filter(text__icontains=query_string)
+        if request.body is not None and len(request.body) > 0:
+            json_filters = json.loads(request.body, encoding='utf-8')
+        else:
+            json_filters = {}
         found_assets = Asset.objects.filter(
             new_version=None).filter(
-            text_reference_list__contains=found_texts)
+            raw_content_cache__icontains=query_string)
+        return HttpResponse(content=json.dumps({"Foo": "bar"}), content_type="application/json")
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest(content=json.dumps({
-            "Error": "Request not in JSON format. The requests body has to be valid JSON."
+            "Error": "Request not in JSON format. The request body has to be valid JSON."
         }), content_type="application/json")

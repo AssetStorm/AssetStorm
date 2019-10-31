@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path
 from assets.views import load_asset, save_asset, turnout, query
 
@@ -21,5 +20,6 @@ urlpatterns = [
     path('', turnout, name="turnout_request"),
     path('load', load_asset, name="load_asset"),
     path('save', save_asset, name="save_asset"),
-    path('find', query, name="find_asset"),
+    path('find', query, {"query_string": ""}, name="filter_assets"),
+    path('find/<str:query_string>', query, name="find_assets"),
 ]
