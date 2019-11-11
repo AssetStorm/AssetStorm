@@ -74,3 +74,11 @@
     schema: {}
     templates:
       raw: "ct.de/@@@@"
+- model: assets.AssetType
+  pk: 48
+  fields:
+    type_name: span-emphasized-strong
+    parent_type: 4
+    schema: {"text": 1}
+    templates:
+      raw: "{{text}}"
