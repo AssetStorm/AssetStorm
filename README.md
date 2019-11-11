@@ -1,5 +1,13 @@
 # AssetStorm
-Asset Management System
+
+![Logo by Albert Hulm](images/logo_500.png)
+
+AssetStorm lets you save data with your preferred schemas in a 
+PostgreSQL database. This can be used for publications like magazines
+or websites but also for a lot of other things.
+
+There is no frontend included with AssetStorm. It just exposes its 
+[API](https://github.com/pinae/AssetStorm/blob/master/AssetStormAPI.yaml).
 
 ## Development setup
 On Ubuntu install `postgresql` and `libpq-dev`.
