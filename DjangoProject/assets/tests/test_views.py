@@ -2,6 +2,7 @@
 from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
+from django.core.management import call_command
 from assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
 import json
 import os
@@ -706,3 +707,113 @@ class TestTurnoutView(TestCase):
             "code": "print(1)",
             "language": "python"
         }))
+
+
+class TestQueryView(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_filter_not_json(self):
+        response = self.client.post(
+            reverse("find_assets", args={"query_string": "foo"}),
+            data="{argh: 2]", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content), {
+            "Error": "The filters are not in JSON format. The request body has to be valid JSON."
+        })
+
+    def test_wrong_content_type(self):
+        response = self.client.post(
+            reverse("filter_assets"),
+            data="{\"key\": \"value\"}", content_type="text/html")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content),
+                         {"Error": "If you supply filters they need to be valid JSON " +
+                                   "and the request must have the MIME-type \"application/json\"."})
+
+    def test_wrong_content_type_but_empty_body(self):
+        response = self.client.post(
+            reverse("filter_assets"),
+            data="", content_type="text/html")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content),
+                         {"assets": []})
+
+    def test_filter_empty(self):
+        response = self.client.post(
+            reverse("filter_assets"),
+            data=None, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_search_over_two_assets(self):
+        save_response = self.client.post(reverse("save_asset"), data={
+            "type": "block-info-box",
+            "title": "Box from test",
+            "content": [
+                {"type": "block-paragraph",
+                 "spans": [
+                     {"type": "span-regular",
+                      "text": "This is the text "},
+                     {"type": "span-strong",
+                      "text": "you"},
+                     {"type": "span-regular",
+                      "text": " are searching for!"}
+                 ]}
+            ]
+        }, content_type="application/json")
+        call_command("build_caches")
+        box = Asset.objects.get(pk=json.loads(save_response.content)["id"])
+        find_response = self.client.post(reverse("find_assets", args=("text you",)),
+                                         data=None, content_type="application/json")
+        found_assets = json.loads(find_response.content)["assets"]
+        self.assertEqual(len(found_assets), 2)
+        self.assertIn({
+            "id": str(box.pk),
+            "type_id": box.t.pk,
+            "raw_content_snippet": box.raw_content_cache[:500]
+        }, found_assets)
+        parapgraph = Asset.objects.get(pk=box.content_ids["content"][0])
+        self.assertIn({
+            "id": str(parapgraph.pk),
+            "type_id": parapgraph.t.pk,
+            "raw_content_snippet": parapgraph.raw_content_cache[:500]
+        }, found_assets)
+
+    def test_search_over_two_assets_with_filter(self):
+        save_response = self.client.post(reverse("save_asset"), data={
+            "type": "block-info-box",
+            "title": "Box from test",
+            "content": [
+                {"type": "block-paragraph",
+                 "spans": [
+                     {"type": "span-regular",
+                      "text": "This is the text "},
+                     {"type": "span-strong",
+                      "text": "you"},
+                     {"type": "span-regular",
+                      "text": " are searching for!"}
+                 ]}
+            ]
+        }, content_type="application/json")
+        call_command("build_caches")
+        box = Asset.objects.get(pk=json.loads(save_response.content)["id"])
+        find_response = self.client.post(
+            reverse("find_assets", args=("text you",)),
+            data={
+                "type": "block-info-box"
+            }, content_type="application/json")
+        found_assets = json.loads(find_response.content)["assets"]
+        self.assertEqual(len(found_assets), 1)
+        self.assertIn({
+            "id": str(box.pk),
+            "type_id": box.t.pk,
+            "raw_content_snippet": box.raw_content_cache[:500]
+        }, found_assets)

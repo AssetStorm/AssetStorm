@@ -517,3 +517,17 @@ class RawTemplateTests(TestCase):
         })
         box.save()
         self.assertEqual(box.render_template(), "Bar\n\nFoo Bar\n\nBar\n\n")
+
+
+class AssetTypeTests(TestCase):
+    fixtures = [
+        'span_assets.yaml',
+        'caption-span_assets.yaml',
+        'block_assets.yaml',
+        'table.yaml',
+        'enum_types.yaml'
+    ]
+
+    def test_str(self):
+        span_regular = AssetType.objects.get(type_name="span-regular")
+        self.assertEqual(str(span_regular), "<AssetType 6: span-regular !>")

@@ -13,7 +13,7 @@ class AssetType(models.Model):
 
     def __str__(self):
         schema_str = "?" if self.schema is None else "!"
-        return "(" + str(self.pk) + ") " + self.type_name + " " + schema_str
+        return "<AssetType %d: %s %s>" % (self.pk, self.type_name, schema_str)
 
 
 class EnumType(models.Model):

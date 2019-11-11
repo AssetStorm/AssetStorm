@@ -237,13 +237,28 @@ def turnout(request):
 
 
 def query(request, query_string=""):
+    if request.content_type != "application/json" and len(request.body) > 0:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "If you supply filters they need to be valid JSON and " +
+                     "the request must have the MIME-type \"application/json\"."
+        }), content_type="application/json")
     try:
-        json_filters = json.loads(request.body, encoding='utf-8')
-        found_texts = Text.objects.filter(text__icontains=query_string)
+        if request.body is not None and len(request.body) > 0 and request.content_type == "application/json":
+            json_filters = json.loads(request.body, encoding='utf-8')
+        else:
+            json_filters = {}
         found_assets = Asset.objects.filter(
             new_version=None).filter(
-            text_reference_list__contains=found_texts)
+            raw_content_cache__icontains=query_string).filter(
+            content_cache__contains=json_filters)
+        return HttpResponse(content=json.dumps({
+            "assets": [{
+                "id": str(a.pk),
+                "type_id": a.t.pk,
+                "raw_content_snippet": a.raw_content_cache[:500]
+            } for a in found_assets]
+        }), content_type="application/json")
     except json.decoder.JSONDecodeError:
         return HttpResponseBadRequest(content=json.dumps({
-            "Error": "Request not in JSON format. The requests body has to be valid JSON."
+            "Error": "The filters are not in JSON format. The request body has to be valid JSON."
         }), content_type="application/json")
