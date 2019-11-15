@@ -145,8 +145,16 @@
 - model: assets.AssetType
   pk: 48
   fields:
+    type_name: block-heading
+    parent_type: 5
+    schema: {"heading": 1}
+    templates:
+      raw: "{{heading}}\n\n"
+- model: assets.AssetType
+  pk: 49
+  fields:
     type_name: block-subheading
     parent_type: 5
     schema: {"heading": 1}
     templates:
-      raw: "{{heading}}"
+      raw: "{{heading}}\n\n"

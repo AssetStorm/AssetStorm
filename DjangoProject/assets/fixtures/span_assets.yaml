@@ -75,9 +75,9 @@
     templates:
       raw: "ct.de/@@@@"
 - model: assets.AssetType
-  pk: 48
+  pk: 50
   fields:
-    type_name: span-emphasized-strong
+    type_name: span-strong-emphasized
     parent_type: 4
     schema: {"text": 1}
     templates:
