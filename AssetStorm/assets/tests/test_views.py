@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.test import Client
 from django.urls import reverse
 from django.core.management import call_command
-from assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
+from AssetStorm.assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
 import json
 import os
 
@@ -634,7 +634,7 @@ class TestSaveAsset(TestCase):
         }))
 
     def test_testilinio(self):
-        with open(os.path.join("assets", "tests", "testilinio.json"), 'r') as json_file:
+        with open(os.path.join(os.path.dirname(__file__), "testilinio.json"), 'r') as json_file:
             testilinio_tree = json.load(json_file)
         response = self.client.post(reverse('save_asset'),
                                     data=testilinio_tree,

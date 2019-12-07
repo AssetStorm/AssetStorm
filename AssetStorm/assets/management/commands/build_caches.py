@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.management.base import BaseCommand
-from assets.models import Asset
+from AssetStorm.assets.models import Asset
 
 
 class Command(BaseCommand):
