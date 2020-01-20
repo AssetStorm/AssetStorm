@@ -2,7 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponseBadRequest, HttpResponse
 from AssetStorm.assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
+import yaml
 import uuid
+import os
 
 
 class AssetStructureError(Exception):
@@ -262,3 +264,32 @@ def query(request, query_string=""):
         return HttpResponseBadRequest(content=json.dumps({
             "Error": "The filters are not in JSON format. The request body has to be valid JSON."
         }), content_type="application/json")
+
+
+def get_template(request):
+    if "type_name" not in request.GET or "template_type" not in request.GET:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "You must supply template_type and type_name as GET params."
+        }), content_type="application/json")
+    try:
+        ato = AssetType.objects.get(type_name=request.GET["type_name"])
+    except AssetType.DoesNotExist:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
+        }), content_type="application/json")
+    if request.GET["template_type"] not in ato.templates.keys():
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "The AssetType \"" + request.GET["type_name"] +
+                     "\" has no template \"" + request.GET["template_type"] + "\"."
+        }), content_type="application/json")
+    return HttpResponse(content=ato.templates[request.GET["template_type"]],
+                        content_type="text/plain")
+
+
+def deliver_open_api_definition(request):
+    with open("AssetStormAPI.yaml", 'r') as yaml_file:
+        api_definition = yaml.safe_load(yaml_file.read())
+    if os.getenv("SERVER_NAME") is not None:
+        api_definition["servers"][0]['url'] = os.getenv("SERVER_NAME")
+    return HttpResponse(content=json.dumps(api_definition),
+                        content_type="application/json")

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.test import Client
+from test.support import EnvironmentVarGuard
 from django.urls import reverse
 from django.core.management import call_command
 from AssetStorm.assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
+from AssetStorm.urls import urlpatterns
 import json
 import os
 
@@ -817,3 +819,73 @@ class TestQueryView(TestCase):
             "type_id": box.t.pk,
             "raw_content_snippet": box.raw_content_cache[:500]
         }, found_assets)
+
+
+class TestGetTemplateView(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_no_params(self):
+        error_response = self.client.get(reverse("get_template"))
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "You must supply template_type and type_name as GET params."},
+                         json.loads(error_response.content))
+
+    def test_non_existent_asset_type(self):
+        error_response = self.client.get(reverse("get_template"), data={
+            "type_name": "illegal_type", "template_type": "proof_html"})
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "The AssetType \"illegal_type\" does not exist."},
+                         json.loads(error_response.content))
+
+    def test_non_existent_template_type(self):
+        foo = AssetType(type_name="foo", schema={"key": 1}, templates={"raw": "{{key}}"})
+        foo.save()
+        error_response = self.client.get(reverse("get_template"), data={
+            "type_name": "foo", "template_type": "proof_html"})
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "The AssetType \"foo\" has no template \"proof_html\"."},
+                         json.loads(error_response.content))
+
+    def test_successful_request(self):
+        foo = AssetType(type_name="foo", schema={"key": 1}, templates={
+            "raw": "{{key}}",
+            "proof_html": "<div class=\"foo\">{{key}}</div>"})
+        foo.save()
+        response = self.client.get(reverse("get_template"), data={
+            "type_name": "foo", "template_type": "proof_html"})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("utf-8", response.charset)
+        self.assertEqual("text/plain", response['content-type'])
+        self.assertEqual("<div class=\"foo\">{{key}}</div>",
+                         str(response.content, encoding="utf-8"))
+
+
+class TestDeliverOpenApiDefinition(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+        self.env = EnvironmentVarGuard()
+
+    def test_default_first_server(self):
+        response = self.client.get(reverse("openapi.json"))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("application/json", response['content-type'])
+        api_def = json.loads(response.content)
+        self.assertEqual('3.0.0', api_def['openapi'])
+        self.assertEqual('AssetStorm', api_def['info']['title'])
+        self.assertEqual({'url': 'http://assetstorm.pinae.net'}, api_def['servers'][0])
+        for url in urlpatterns:
+            pattern = '/' + str(url.pattern).replace('<str:', '{').replace('>', '}')
+            self.assertIn(pattern, api_def['paths'])
+
+    def test_server_by_env(self):
+        self.env.set('SERVER_NAME', 'https://test.org/foo/bar/baz')
+        with self.env:
+            response = self.client.get(reverse("openapi.json"))
+            self.assertEqual(200, response.status_code)
+            self.assertEqual("application/json", response['content-type'])
+            api_def = json.loads(response.content)
+            self.assertEqual({'url': 'https://test.org/foo/bar/baz'}, api_def['servers'][0])

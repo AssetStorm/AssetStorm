@@ -92,17 +92,17 @@ paths:
           $ref: "#/paths/~1find~1%7BsearchString%7D/post/responses/200"
         default:
           $ref: "#/paths/~1find~1%7BsearchString%7D/post/responses/default"
-  /find/{searchString}:
+  /find/{query_string}:
     post:
-      summary: Query for assets with a search string and filters
+      summary: Query for assets with a query_string and filters
       operationId: find_asset
       tags:
         - asset
       parameters:
-        - name: searchString
+        - name: query_string
           in: path
           required: true
-          description: The search string may be empty
+          description: The query string may be empty
           schema:
             type: string
       requestBody:
@@ -123,6 +123,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /get_template:
+    get:
+      summary: Load template definitions for AssetType objects.
+      operationId: get_template
+      tags:
+        - asset
+      parameters:
+        - name: type_name
+          in: query
+          required: true
+          description: The type_name of the AssetType
+          schema:
+            type: string
+        - name: template_type
+          in: query
+          required: true
+          description: The template_type of the template in the AssetType
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the template as a string.
+          content:
+            text/plain:
+              schema:
+                type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /openapi.json:
+    get:
+      summary: Load template definitions for AssetType objects.
+      operationId: openapi.json
+      tags:
+        - asset
+      responses:
+        '200':
+          description: Returns the OpenAPI definition as JSON.
+          content:
+            application/json:
+              schema:
+                type: string
 components:
   schemas:
     ErrorResponse:
