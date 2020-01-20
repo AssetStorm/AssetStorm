@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     #'django.contrib.messages',
     #'django.contrib.staticfiles',
     'django.contrib.postgres',
-    'assets',
+    'AssetStorm.assets.apps.AssetConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,11 +78,11 @@ WSGI_APPLICATION = 'AssetStorm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'assetstormdevelop',
-        'USER': 'assetstorm',
-        'PASSWORD': 'cttest',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'asst_dev',
+        'USER': 'foo',
+        'PASSWORD': 'bar',
+        'HOST': '127.0.0.1',
+        'PORT': '5436',
     }
 }
 
@@ -109,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'de-DE'
+# LANGUAGE_CODE = 'de-DE'
 
 TIME_ZONE = 'UTC'
 

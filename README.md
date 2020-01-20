@@ -14,29 +14,28 @@ On Ubuntu install `postgresql` and `libpq-dev`.
 
 After that create a virtual environment and install the requirements:
 ```shell script
-python3 -m venv venv
-source env/bin/activate
-pip install -r requirements.txt
+make build
 ```
 
 After that start the postgres server and create an account and a 
 database for development:
-```shell script
-sudo systemctl start postgresql
-sudo -u postgres psql postgres
-```
 
 ```shell script
-postgres=# \password postgres
-Enter new password: 
-Enter it again: 
-postgres=# CREATE USER assetStorm;
-CREATE ROLE
-postgres=# CREATE DATABASE AssetStormDevelop OWNER assetStorm;
-CREATE DATABASE
-postgres=# \password assetStorm
-Enter new password: 
-Enter it again:
-postgres=# ALTER USER assetstorm CREATEDB;
-ALTER ROLE
+docker-compose up 
 ```
+
+We run `docker-compose` in foreground to be able to see all SQL queries.
+
+
+### Tests
+
+To run the tests in terminal, call: 
+
+```shell script
+make test
+```
+
+To run and debug tests in PyCharm, you need to have PyCharms Django settings
+configured properly. 
+
+![PyCharm Django](images/pycharm_django.jpg "PyCharm Django")

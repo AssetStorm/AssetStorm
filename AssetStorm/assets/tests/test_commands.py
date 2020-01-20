@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.core.management import call_command
-from assets.models import Text, Asset, AssetType
+
+from AssetStorm.assets.models import Text, Asset, AssetType
 
 
 class TestBuildCaches(TestCase):

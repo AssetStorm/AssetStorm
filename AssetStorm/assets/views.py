@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest, HttpResponse
-from assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
+from AssetStorm.assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
 import uuid
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum
+from AssetStorm.assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum
 import json
 
 
