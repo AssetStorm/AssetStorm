@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from AssetStorm.assets.views import load_asset, save_asset, turnout, query
-from assets.views import get_template, deliver_open_api_definition
+from AssetStorm.assets.views import get_template, deliver_open_api_definition
 
 urlpatterns = [
     path('', turnout, name="turnout_request"),
