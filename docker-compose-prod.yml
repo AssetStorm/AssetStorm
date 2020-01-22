@@ -1,9 +1,9 @@
 version: "3.7"
-service:
+services:
   web:
-    build: assetstorm/Assetstorm:latest
+    image: assetstorm/assetstorm:latest
     depends_on: 
-        - postgres
+      - postgres
     environment:
       LC_ALL: C.UTF-8
       AS_POSTGRES_USER: assetstorm
@@ -12,18 +12,18 @@ service:
       AS_POSTGRES_HOST: postgres
       AS_DEBUG: 'True'
   postgres:
-    build: ./postgres
+    image: postgres:alpine
     restart: unless-stopped
     environment:
-          LC_ALL: C.UTF-8
-          POSTGRES_USER: assetstorm
-          POSTGRES_PASSWORD: cttest
-          POSTGRES_DB: assetstorm 
+      LC_ALL: C.UTF-8
+      POSTGRES_USER: assetstorm
+      POSTGRES_PASSWORD: cttest
+      POSTGRES_DB: assetstorm 
   nginx:
     restart: always
-    build: ./nginx/
+    image: assetstorm/nginx-python:latest
     ports: 
-      - "88:80"
+      - "89:80"
     depends_on:
       - web
     environment:
