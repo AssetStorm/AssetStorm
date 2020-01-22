@@ -1,0 +1,14 @@
+name: Publish Docker
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Publish to Docker Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: assetstorm/assetstorm
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: src
