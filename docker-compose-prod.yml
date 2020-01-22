@@ -1,7 +1,8 @@
 version: "3.7"
 services:
   web:
-    image: assetstorm/assetstorm:latest
+    #image: assetstorm/assetstorm:latest
+    build: ./src
     depends_on: 
       - postgres
     environment:
@@ -17,7 +18,7 @@ services:
     environment:
       LC_ALL: C.UTF-8
       POSTGRES_USER: assetstorm
-      POSTGRES_PASSWORD: cttest
+      POSTGRES_PASSWORD: test
       POSTGRES_DB: assetstorm 
   nginx:
     restart: always

@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%=_a_qi29mb3v6$h41lt#b15xegkk-(^-3h_s^mqpvbrk7za6#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get("DEBUG", 'False'))
 
 ALLOWED_HOSTS = []
 
@@ -72,10 +72,10 @@ WSGI_APPLICATION = 'AssetStorm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'assetstormdevelop',
-        'USER': 'assetstorm',
-        'PASSWORD': 'cttest',
-        'HOST': 'localhost',
+        'NAME': os.environ.setdefault('AS_POSTGRES_DB', 'assetstorm'),
+        'USER': os.environ.setdefault('AS_POSTGRES_USER', 'assetstorm'),
+        'PASSWORD': os.environ.setdefault('AS_POSTGRES_PASSWORD', 'test'),
+        'HOST': os.environ.setdefault('AS_POSTGRES_HOST', 'localhost'),
         'PORT': '',
     }
 }
