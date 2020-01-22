@@ -1,6 +1,6 @@
 FROM python:3.8-alpine
 ENV PYTHONUNBUFFERED 1
-RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev bash
 RUN pip install --upgrade pip && pip install psycopg2
 
 RUN mkdir /code
