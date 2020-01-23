@@ -24,7 +24,7 @@ services:
     restart: always
     image: assetstorm/nginx-python:latest
     ports: 
-      - "89:80"
+      - "8081:80"
     depends_on:
       - web
     environment:
