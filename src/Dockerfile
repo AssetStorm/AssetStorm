@@ -11,6 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8081
+EXPOSE 8080
 
 CMD bash -c "./startup.sh"
