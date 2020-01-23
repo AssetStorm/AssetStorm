@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.db import connection
+from django.db.utils import OperationalError
 from django.http import HttpResponseBadRequest, HttpResponse
 from AssetStorm.assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
@@ -293,3 +295,11 @@ def deliver_open_api_definition(request):
         api_definition["servers"][0]['url'] = os.getenv("SERVER_NAME")
     return HttpResponse(content=json.dumps(api_definition),
                         content_type="application/json")
+
+
+def live(request):
+    try:
+        connection.ensure_connection()
+        return HttpResponse(content="", content_type="text/plain", status=200)
+    except OperationalError:
+        return HttpResponse(content="", content_type="text/plain", status=400)

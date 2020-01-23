@@ -168,6 +168,25 @@ paths:
             application/json:
               schema:
                 type: string
+  /live:
+    get:
+      summary: Ask the django app if everything including the database is up and running.
+      operationId: live
+      tags:
+        - asset
+      responses:
+        '200':
+          description: AssetStorm is up and running
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: The database is not online (yet)
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     ErrorResponse:

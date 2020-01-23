@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from AssetStorm.assets.views import load_asset, save_asset, turnout, query
-from AssetStorm.assets.views import get_template, deliver_open_api_definition
+from AssetStorm.assets.views import get_template, deliver_open_api_definition, live
 
 urlpatterns = [
     path('', turnout, name="turnout_request"),
@@ -24,5 +24,6 @@ urlpatterns = [
     path('find', query, {"query_string": ""}, name="filter_assets"),
     path('find/<str:query_string>', query, name="find_assets"),
     path('get_template', get_template, name="get_template"),
-    path('openapi.json', deliver_open_api_definition, name="openapi.json")
+    path('openapi.json', deliver_open_api_definition, name="openapi.json"),
+    path('live', live, name="live")
 ]
