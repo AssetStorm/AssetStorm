@@ -1,7 +1,8 @@
 version: '3.4'
 services:
-  db:
-    image: postgres:10.1-alpine
+  assetstorm-postgres:
+    image: postgres:alpine
+    restart: unless-stopped
     # configure
     # - logging, we want to see all statements. setting `log_min_duration_statement` causes to
     #   log to the same line (better than `log_statement` and `log_duration`)
@@ -19,16 +20,9 @@ services:
         -c checkpoint_completion_target=0.8
         -c work_mem=8MB
     ports:
-      - 127.0.0.1:5436:5432
+      - 5432:5432
     environment:
-      POSTGRES_USER: foo
-      POSTGRES_PASSWORD: bar
-      POSTGRES_DB: asst_dev
-    volumes:
-      - asst_dev_pg_data:/var/lib/postgresql/data:delegated
-    expose:
-      - 5432
-
-
-volumes:
-  asst_dev_pg_data:
+      LC_ALL: "C.UTF-8"
+      POSTGRES_USER: "assetstorm"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "assetstorm"

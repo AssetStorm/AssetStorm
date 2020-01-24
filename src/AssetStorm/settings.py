@@ -76,7 +76,7 @@ DATABASES = {
         'USER': os.environ.setdefault('AS_POSTGRES_USER', 'assetstorm'),
         'PASSWORD': os.environ.setdefault('AS_POSTGRES_PASSWORD', 'test'),
         'HOST': os.environ.setdefault('AS_POSTGRES_HOST', 'localhost'),
-        'PORT': '',
+        'PORT': os.environ.setdefault('AS_POSTGRES_PORT', '5432'),
     }
 }
 

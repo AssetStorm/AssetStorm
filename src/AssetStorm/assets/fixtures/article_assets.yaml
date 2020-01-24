@@ -7,17 +7,18 @@
   fields:
     type_name: article-standard
     parent_type: 5
-    schema: {
-      "working_title": 1,
-      "x_id": 1,
-      "catchphrase": 1,
-      "column": 1,
-      "title": 1,
-      "subtitle": 1,
-      "author": 1
-      "teaser": 1,
-      "content": [5]
-    }
+    schema: |
+      {
+        "working_title": 1,
+        "x_id": 1,
+        "catchphrase": 1,
+        "column": 1,
+        "title": 1,
+        "subtitle": 1,
+        "author": 1
+        "teaser": 1,
+        "content": [5]
+      }
     templates:
       raw: "{{title}}\n\n\
       {{subtitle}}\n\n\
@@ -38,7 +39,7 @@
       <div class=\"x_id\">{{x_id}}</div>\
       <div class=\"catchphrase\">{{catchphrase}}</div>\
       <div class=\"column\">{{column}}</div>\
-      <h1>{{title}}<\h1>\
+      <h1>{{title}}</h1>\
       <h2 class=\"subtitle\">{{subtitle}}</h2>\
       <div class=\"teaser\">{{teaser}}</div>\
       <div class=\"author\">Von {{author}}</div>\
