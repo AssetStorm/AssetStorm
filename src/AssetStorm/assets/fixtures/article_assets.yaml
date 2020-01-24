@@ -6,7 +6,7 @@
   pk: 52
   fields:
     type_name: article-standard
-    parent_type: 5
+    parent_type: 51
     schema: |
       {
         "working_title": 1,
