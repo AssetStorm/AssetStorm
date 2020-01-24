@@ -864,6 +864,43 @@ class TestGetTemplateView(TestCase):
                          str(response.content, encoding="utf-8"))
 
 
+class TestGetTypesForParentView(TestCase):
+    fixtures = [
+        'span_assets.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_no_parent_type_name(self):
+        error_response = self.client.get(reverse("get_types_for_parent"))
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "You must supply parent_type_name as GET param."},
+                         json.loads(error_response.content))
+
+    def test_unknown_parent_type_name(self):
+        error_response = self.client.get(reverse("get_types_for_parent"), data={
+            "parent_type_name": "non-existent-AssetType"})
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "The AssetType \"non-existent-AssetType\" does not exist."},
+                         json.loads(error_response.content))
+
+    def test_successful(self):
+        response = self.client.get(reverse("get_types_for_parent"), data={
+            "parent_type_name": "span"})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("application/json", response['content-type'])
+        correct_spans = ['span-strong-emphasized', 'span-ct-link', 'span-abbreviation', 'span-program',
+                         'span-link', 'span-path', 'span-listing', 'span-strong', 'span-emphasized',
+                         'span-regular']
+        loaded_spans = json.loads(response.content)
+        self.assertEqual(len(correct_spans), len(loaded_spans))
+        for span in correct_spans:
+            self.assertIn(span, loaded_spans)
+
+
 class TestDeliverOpenApiDefinition(TestCase):
     def setUp(self) -> None:
         self.client = Client()

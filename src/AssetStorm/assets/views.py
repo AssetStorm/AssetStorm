@@ -288,6 +288,22 @@ def get_template(request):
                         content_type="text/plain")
 
 
+def get_types_for_parent(request):
+    if "parent_type_name" not in request.GET:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "You must supply parent_type_name as GET param."
+        }), content_type="application/json")
+    try:
+        parent = AssetType.objects.get(type_name=request.GET["parent_type_name"])
+    except AssetType.DoesNotExist:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "The AssetType \"" + request.GET["parent_type_name"] + "\" does not exist."
+        }), content_type="application/json")
+    children = [child.type_name for child in parent.children.all()]
+    return HttpResponse(content=json.dumps(children),
+                        content_type="application/json")
+
+
 def deliver_open_api_definition(request):
     with open("AssetStormAPI.yaml", 'r') as yaml_file:
         api_definition = yaml.safe_load(yaml_file.read())

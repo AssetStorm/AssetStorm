@@ -155,6 +155,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /get_types_for_parent:
+    get:
+      summary: Load type names of all child AssetType objects of the given AssetType.
+      operationId: get_types_for_parent
+      tags:
+        - asset
+      parameters:
+        - name: parent_type_name
+          in: query
+          required: true
+          description: The type_name of the parent AssetType
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the list of type names.
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/TypeNameList"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /openapi.json:
     get:
       summary: Load template definitions for AssetType objects.
@@ -225,6 +251,10 @@ components:
           items:
             type: string
             format: uuid
+    TypeNameList:
+      type: array
+      items:
+        type: string
     AssetTree:
       type: object
       anyOf:
