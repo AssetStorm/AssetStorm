@@ -864,6 +864,46 @@ class TestGetTemplateView(TestCase):
                          str(response.content, encoding="utf-8"))
 
 
+class TestGetSchemaView(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_no_params(self):
+        error_response = self.client.get(reverse("get_schema"))
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "You must supply a type_name or a type_id as GET params."},
+                         json.loads(error_response.content))
+
+    def test_non_existent_asset_type(self):
+        error_response = self.client.get(reverse("get_schema"), data={
+            "type_name": "illegal_type", "template_type": "proof_html"})
+        self.assertEqual(400, error_response.status_code)
+        self.assertEqual("application/json", error_response['content-type'])
+        self.assertEqual({"Error": "The AssetType \"illegal_type\" does not exist."},
+                         json.loads(error_response.content))
+
+    def test_successful_request_type_name(self):
+        foo = AssetType(type_name="foo", schema={"key": 1}, templates={"raw": "{{key}}"})
+        foo.save()
+        response = self.client.get(reverse("get_schema"), data={"type_name": "foo"})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("utf-8", response.charset)
+        self.assertEqual("application/json", response['content-type'])
+        self.assertEqual(json.dumps({"key": 1}),
+                         str(response.content, encoding="utf-8"))
+
+    def test_successful_request_type_id(self):
+        foo = AssetType(type_name="foo", schema={"key": 1}, templates={"raw": "{{key}}"})
+        foo.save()
+        response = self.client.get(reverse("get_schema"), data={"type_id": foo.pk})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("utf-8", response.charset)
+        self.assertEqual("application/json", response['content-type'])
+        self.assertEqual(json.dumps({"key": 1}),
+                         str(response.content, encoding="utf-8"))
+
+
 class TestGetTypesForParentView(TestCase):
     fixtures = [
         'span_assets.yaml'

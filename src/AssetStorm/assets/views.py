@@ -288,6 +288,23 @@ def get_template(request):
                         content_type="text/plain")
 
 
+def get_schema(request):
+    if "type_name" not in request.GET and "type_id" not in request.GET:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "You must supply a type_name or a type_id as GET params."
+        }), content_type="application/json")
+    try:
+        if "type_id" in request.GET:
+            ato = AssetType.objects.get(pk=int(request.GET["type_id"]))
+        else:
+            ato = AssetType.objects.get(type_name=request.GET["type_name"])
+    except AssetType.DoesNotExist:
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
+        }), content_type="application/json")
+    return HttpResponse(content=json.dumps(ato.schema), content_type="application/json")
+
+
 def get_types_for_parent(request):
     if "parent_type_name" not in request.GET:
         return HttpResponseBadRequest(content=json.dumps({

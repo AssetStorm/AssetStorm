@@ -155,6 +155,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /get_schema:
+    get:
+      summary: Load schema for AssetType objects.
+      operationId: get_template
+      tags:
+        - asset
+      parameters:
+        - name: type_name
+          in: query
+          required: true
+          description: The type_name of the AssetType
+          schema:
+            type: string
+        - name: type_id
+          in: query
+          required: true
+          description: The ID of the AssetType
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Returns the schema as JSON string.
+          content:
+            application/json:
+              schema:
+                type: "#/components/schemas/AssetTypeSchema"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /get_types_for_parent:
     get:
       summary: Load type names of all child AssetType objects of the given AssetType.
@@ -255,6 +287,17 @@ components:
       type: array
       items:
         type: string
+    AssetTypeSchema:
+      type: object
+      properties:
+        type:
+          type: string
+      additionalProperties:
+        oneOf:
+          - type: integer
+          - type: array
+            items:
+              type: integer
     AssetTree:
       type: object
       anyOf:
