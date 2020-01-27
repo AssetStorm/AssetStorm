@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db import connection
 from django.db.utils import OperationalError
-from django.http import HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
 from AssetStorm.assets.models import AssetType, EnumType, Text, UriElement, Enum, Asset
 import json
 import yaml
@@ -292,7 +292,7 @@ def get_schema(request):
     if "type_name" not in request.GET and "type_id" not in request.GET:
         return HttpResponseBadRequest(content=json.dumps({
             "Error": "You must supply a type_name or a type_id as GET params."
-        }, indent=None).encode('utf-8'), content_type="application/json")
+        }), content_type="application/json")
     try:
         if "type_id" in request.GET:
             ato = AssetType.objects.get(pk=int(request.GET["type_id"]))
@@ -301,8 +301,8 @@ def get_schema(request):
     except AssetType.DoesNotExist:
         return HttpResponseBadRequest(content=json.dumps({
             "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
-        }, indent=None).encode('utf-8'), content_type="application/json")
-    return HttpResponse(content=json.dumps(ato.schema, indent=None).encode('utf-8'), content_type="application/json")
+        }), content_type="application/json")
+    return JsonResponse(data=ato.schema)
 
 
 def get_types_for_parent(request):

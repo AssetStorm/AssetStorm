@@ -890,8 +890,8 @@ class TestGetSchemaView(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("utf-8", response.charset)
         self.assertEqual("application/json", response['content-type'])
-        self.assertEqual(json.dumps({"key": 1}),
-                         str(response.content, encoding="utf-8"))
+        self.assertEqual({"key": 1}, json.loads(
+                         str(response.content, encoding="utf-8")))
 
     def test_successful_request_type_id(self):
         foo = AssetType(type_name="foo", schema={"key": 1}, templates={"raw": "{{key}}"})
@@ -900,8 +900,8 @@ class TestGetSchemaView(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("utf-8", response.charset)
         self.assertEqual("application/json", response['content-type'])
-        self.assertEqual(json.dumps({"key": 1}),
-                         str(response.content, encoding="utf-8"))
+        self.assertEqual({"key": 1}, json.loads(
+                         str(response.content, encoding="utf-8")))
 
 
 class TestGetTypesForParentView(TestCase):
