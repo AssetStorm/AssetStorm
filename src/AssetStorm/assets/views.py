@@ -290,18 +290,18 @@ def get_template(request):
 
 def get_schema(request):
     if "type_name" not in request.GET and "type_id" not in request.GET:
-        return HttpResponseBadRequest(content=json.dumps({
+        return JsonResponse(data={
             "Error": "You must supply a type_name or a type_id as GET params."
-        }), content_type="application/json")
+        }, status=400)
     try:
         if "type_id" in request.GET:
             ato = AssetType.objects.get(pk=int(request.GET["type_id"]))
         else:
             ato = AssetType.objects.get(type_name=request.GET["type_name"])
     except AssetType.DoesNotExist:
-        return HttpResponseBadRequest(content=json.dumps({
+        return JsonResponse(data={
             "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
-        }), content_type="application/json")
+        }, status=400)
     return JsonResponse(data=ato.schema)
 
 
