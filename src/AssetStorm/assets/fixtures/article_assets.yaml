@@ -7,18 +7,17 @@
   fields:
     type_name: article-standard
     parent_type: 51
-    schema: |
-      {
-        "working_title": 1,
-        "x_id": 1,
-        "catchphrase": 1,
-        "column": 1,
-        "title": 1,
-        "subtitle": 1,
-        "author": 1
-        "teaser": 1,
-        "content": [5]
-      }
+    schema:
+      working_title: 1
+      x_id: 1
+      catchphrase: 1
+      column:
+      title: 1
+      subtitle: 1
+      author: 1
+      teaser: 1
+      content:
+        - 5
     templates:
       raw: "{{title}}\n\n\
       {{subtitle}}\n\n\
