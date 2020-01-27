@@ -302,6 +302,8 @@ def get_schema(request):
         return JsonResponse(data={
             "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
         }, status=400)
+    if ato.schema is None:
+        return JsonResponse(data={})
     return JsonResponse(data=ato.schema)
 
 
