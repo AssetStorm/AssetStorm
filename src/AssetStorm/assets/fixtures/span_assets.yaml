@@ -50,8 +50,8 @@
     schema: {"path": 1}
     templates:
       raw: "{{path}}"
-      markdown: "`{{path}}`"
-      proof_html: "<span class=\"span-path\">{{path}}</span>"
+      markdown: "<fs-path>{{path}}</fs-path>"
+      proof_html: "<fs-path>{{path}}</fs-path>"
 - model: assets.AssetType
   pk: 11
   fields:
@@ -70,8 +70,8 @@
     schema: {"program_name": 1}
     templates:
       raw: "{{program_name}}"
-      markdown: "*{{program_name}}*"
-      proof_html: "<span class=\"span-program\">{{program_name}}</span>"
+      markdown: "<program-name>{{program_name}}</program-name>"
+      proof_html: "<program-name>{{program_name}}</program-name>"
 - model: assets.AssetType
   pk: 13
   fields:
@@ -80,6 +80,8 @@
     schema: {"abbreviation": 1, "long_name": 1}
     templates:
       raw: "{{abbreviation}}"
+      markdown: "<abbr><abbr-long>{{abbreviation}}</abbr-long></abbr>"
+      proof_html: "<abbr><abbr-long>{{abbreviation}}</abbr-long></abbr>"
 - model: assets.AssetType
   pk: 14
   fields:
@@ -88,6 +90,8 @@
     schema: {}
     templates:
       raw: "ct.de/@@@@"
+      markdown: "<ctlink />"
+      proof_html: "<ctlink />"
 - model: assets.AssetType
   pk: 50
   fields:
