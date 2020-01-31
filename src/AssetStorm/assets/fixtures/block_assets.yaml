@@ -24,8 +24,8 @@
 
         {{for(caption)}}{{caption}}{{endfor}}
       markdown: "![{{for(caption)}}{{caption}}{{endfor}}]({{image_uri}} \"{{alt}}\")\n\n"
-      proof_html: "<div class=\"block-image\"><img src=\"{{image_uri}}\" alt=\"{{alt}}\" />\
-      <p>{{for(caption)}}{{caption}}{{endfor}}</p></div>"
+      proof_html: "<block-image><img src=\"{{image_uri}}\" alt=\"{{alt}}\" />\
+      <p>{{for(caption)}}{{caption}}{{endfor}}</p></block-image>"
 - model: assets.AssetType
   pk: 22
   fields:
@@ -65,8 +65,8 @@
       markdown: "<!---\ntype: block-citation\nstatement: MD_BLOCK\n-->\n\n\
       > {{statement}}\n\n<!---\nattribution: MD_BLOCK\n-->\n\n\
       *{{attribution}}*\n\n<!--- -->\n\n"
-      proof_html: "<div class=\"block-citation\"><p>{{statement}}</p>\
-      <div class=\"block-citation-attribution\">{{attribution}}</div></div>"
+      proof_html: "<block-citation><p>{{statement}}</p>\
+      <block-citation-attribution>{{attribution}}</block-citation-attribution></block-citation>"
 - model: assets.AssetType
   pk: 25
   fields:
@@ -92,8 +92,8 @@
       markdown: "<!---\ntype: block-accompaniement-box\ntitle: MD_BLOCK\n-->\n\n\
       ### {{title}}\n\n<!---\ncontent: MD_BLOCK\n-->\n\n\
       {{for(content)}}{{content}}{{endfor}}\n\n<!--- -->\n\n"
-      proof_html: "<div class=\"block-accompaniement-box\"><h1>{{title}}</h1>\
-      <p>{{for(content)}}{{content}}{{endfor}}</p></div>"
+      proof_html: "<block-accompaniement-box><h1>{{title}}</h1>\
+      <p>{{for(content)}}{{content}}{{endfor}}</p></block-accompaniement-box>"
 - model: assets.AssetType
   pk: 27
   fields:
@@ -105,8 +105,8 @@
       markdown: "<!---\ntype: block-info-box\ntitle: MD_BLOCK\n-->\n\n\
       ### {{title}}\n\n<!---\ncontent: MD_BLOCK\n-->\n\n\
       {{for(content)}}{{content}}{{endfor}}\n\n<!--- -->\n\n"
-      proof_html: "<div class=\"block-info-box\"><h1>{{title}}</h1>\
-      <p>{{for(content)}}{{content}}{{endfor}}</p></div>"
+      proof_html: "<block-info-box><h1>{{title}}</h1>\
+      <p>{{for(content)}}{{content}}{{endfor}}</p></block-info-box>"
 - model: assets.AssetType
   pk: 28
   fields:
@@ -130,12 +130,12 @@
       {{for(parts)}}1. {{parts}}{{endfor}}\n\n<!---\ntools: MD_BLOCK\n-->\n\n\
       {{for(tools)}} - {{tools}}{{endfor}}\n\n<!---\n\
       time: {{time}}\nprice: {{price}}\ndifficulty: {{difficulty}}\n\n<!--- -->\n\n"
-      proof_html: "<div class=\"block-tinker-box\">\
+      proof_html: "<block-tinker-box>\
       <h2>Bauteile:</h2><ol>{{for(parts)}}<li>{{parts}}</li>{{endfor}}</ol>\
       <h2>Werkzeuge:</h2><ul>{{for(tools)}}<li>{{tools}}</li>{{endfor}}</ul>\
       <h2>Veitbedarf:</h2><p>{{time}}</p>\
       <h2>Preis:</h2><p>{{price}}</p>\
-      <i class=\"tinker-difficulty-{{difficulty}}\"></i></div>"
+      <i class=\"tinker-difficulty-{{difficulty}}\"></i></block-tinker-box>"
 - model: assets.AssetType
   pk: 30
   fields:
@@ -144,6 +144,17 @@
     schema: {"subtitle": 1, "tools": 1, "foreknowledge": 1, "time": 1, "audience": 1, "costs": 1}
     templates:
       raw: "{{subtitle}}\n\n{{audience}}\n\n{{foreknowledge}}\n\n{{tools}}\n\n{{time}}\n\n{{costs}}"
+      markdown: "<!---\ntype: block-tinker-box\nsubtitle: {{subtitle}}\n\
+      audience: {{audience}}\nforeknowledge: {{foreknowledge}}\n\
+      tools: {{tools}}\ntime: {{time}}\ncosts: {{costs}}\n\n<!--- -->\n\n"
+      proof_html: "<block-potty-box>\
+      <h1>{{subtitle}}</h1>\
+      <h2>Zielgruppe:</h2><p>{{audience}}</p>\
+      <h2>Vorwissen:</h2><p>{{foreknowledge}}</p>\
+      <h2>Werkzeug:</h2><p>{{tools}}</p>\
+      <h2>Zeitbedarf:</h2><p>{{time}}</p>\
+      <h2>Kosten:</h2><p>{{costs}}</p>\
+      </block-potty-box>"
 - model: assets.AssetType
   pk: 31
   fields:
@@ -184,6 +195,8 @@
     schema: {"heading": 1}
     templates:
       raw: "{{heading}}\n\n"
+      markdown: "# {{heading}}\n\n"
+      proof_html: "<h1>{{heading}}</h1>"
 - model: assets.AssetType
   pk: 49
   fields:
