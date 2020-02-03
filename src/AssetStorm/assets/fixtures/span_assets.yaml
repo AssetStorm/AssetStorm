@@ -41,7 +41,7 @@
     templates:
       raw: "{{listing_text}}"
       markdown: "`{{listing_text}}`"
-      proof_html: "<pre>{{listing_text}}</pre>"
+      proof_html: "<code>{{listing_text}}</code>"
 - model: assets.AssetType
   pk: 10
   fields:
