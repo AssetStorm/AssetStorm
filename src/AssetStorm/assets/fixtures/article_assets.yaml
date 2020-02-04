@@ -34,7 +34,7 @@
       subtitle: MD_BLOCK\n-->\n\n## {{subtitle}}\n\n<!---\n\
       teaser: MD_BLOCK\n-->\n\n**{{teaser}}**\n\n<!---\n\
       author: MD_BLOCK\n-->\n\n{{author}}\n\n<!---\n\
-      content: MD_BLOCK\n-->\n\n{{for(content)}}{{content}}{{endfor}}<!--- -->\n"
+      content: MD_BLOCK\n-->\n\n{{for(content)}}{{content}}{{endfor}}<!--- -->"
       proof_html: "<article-standard>\
       <x_id>{{x_id}}</x_id>\
       <catchphrase>{{catchphrase}}</catchphrase>\
