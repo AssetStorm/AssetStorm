@@ -207,3 +207,43 @@
       raw: "{{heading}}\n\n"
       markdown: "## {{heading}}\n\n"
       proof_html: "<h2>{{heading}}</h2>"
+- model: assets.AssetType
+  pk: 53
+  fields:
+    type_name: block-subsubheading
+    parent_type: 5
+    schema: {"heading": 1}
+    templates:
+      raw: "{{heading}}\n\n"
+      markdown: "### {{heading}}\n\n"
+      proof_html: "<h3>{{heading}}</h3>"
+- model: assets.AssetType
+  pk: 54
+  fields:
+    type_name: block-subsubsubheading
+    parent_type: 5
+    schema: {"heading": 1}
+    templates:
+      raw: "{{heading}}\n\n"
+      markdown: "#### {{heading}}\n\n"
+      proof_html: "<h4>{{heading}}</h4>"
+- model: assets.AssetType
+  pk: 55
+  fields:
+    type_name: block-subsubsubsubheading
+    parent_type: 5
+    schema: {"heading": 1}
+    templates:
+      raw: "{{heading}}\n\n"
+      markdown: "##### {{heading}}\n\n"
+      proof_html: "<h5>{{heading}}</h5>"
+- model: assets.AssetType
+  pk: 56
+  fields:
+    type_name: block-subsubsubsubsubheading
+    parent_type: 5
+    schema: {"heading": 1}
+    templates:
+      raw: "{{heading}}\n\n"
+      markdown: "###### {{heading}}\n\n"
+      proof_html: "<h6>{{heading}}</h6>"
