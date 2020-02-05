@@ -257,3 +257,13 @@
       raw: "{{for(items)}}1. {{items}}{{endfor}}"
       markdown: "{{for(items)}}1. {{items}}{{endfor}}"
       proof_html: "<ol>{{for(items)}}<li>{{items}}</li>{{endfor}}</ol>"
+- model: assets.AssetType
+  pk: 58
+  fields:
+    type_name: block-unordered-list
+    parent_type: 5
+    schema: {"items": [4]}
+    templates:
+      raw: "{{for(items)}}- {{items}}{{endfor}}"
+      markdown: "{{for(items)}}* {{items}}{{endfor}}"
+      proof_html: "<ul>{{for(items)}}<li>{{items}}</li>{{endfor}}</ul>"
