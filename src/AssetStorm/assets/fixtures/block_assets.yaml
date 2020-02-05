@@ -258,7 +258,7 @@
       markdown: "{{for(items)}}1. {{items}}{{endfor}}"
       proof_html: "<ol>{{for(items)}}<li>{{items}}</li>{{endfor}}</ol>"
 - model: assets.AssetType
-  pk: 58
+  pk: 59
   fields:
     type_name: block-unordered-list
     parent_type: 5
