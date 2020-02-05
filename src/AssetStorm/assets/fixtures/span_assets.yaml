@@ -113,7 +113,7 @@
       markdown: "{{for(spans)}}{{spans}}{{endfor}}"
       proof_html: "{{for(spans)}}{{spans}}{{endfor}}"
 - model: assets.AssetType
-  pk: 57
+  pk: 60
   fields:
     type_name: span-line-break-container
     parent_type: 4
