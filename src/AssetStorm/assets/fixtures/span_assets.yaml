@@ -102,3 +102,23 @@
       raw: "{{text}}"
       markdown: "***{{text}}***"
       proof_html: "<strong><em>{{text}}</em></strong>"
+- model: assets.AssetType
+  pk: 57
+  fields:
+    type_name: span-container
+    parent_type: 4
+    schema: {"spans": [4]}
+    templates:
+      raw: "{{for(spans)}}{{spans}}{{endfor}}"
+      markdown: "{{for(spans)}}{{spans}}{{endfor}}"
+      proof_html: "{{for(spans)}}{{spans}}{{endfor}}"
+- model: assets.AssetType
+  pk: 57
+  fields:
+    type_name: span-line-break-container
+    parent_type: 4
+    schema: {"spans": [4]}
+    templates:
+      raw: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
+      markdown: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
+      proof_html: "<br /><br />{{for(spans)}}{{spans}}{{endfor}}"
