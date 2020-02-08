@@ -163,6 +163,8 @@
     schema: {"language": {"3": 2}, "code": 1}
     templates:
       raw: "{{code}}\n\n"
+      markdown: "```{{language}}\n{{code}}\n```\n\n"
+      proof_html: "<pre><code class=\"language-{{language}}\">{{code}}</code></pre>"
 - model: assets.AssetType
   pk: 32
   fields:
@@ -254,8 +256,8 @@
     parent_type: 5
     schema: {"items": [4]}
     templates:
-      raw: "{{for(items)}}1. {{items}}{{endfor}}"
-      markdown: "{{for(items)}}1. {{items}}{{endfor}}"
+      raw: "{{for(items)}}1. {{items}}\n{{endfor}}"
+      markdown: "{{for(items)}}1. {{items}}\n{{endfor}}\n"
       proof_html: "<ol>{{for(items)}}<li>{{items}}</li>{{endfor}}</ol>"
 - model: assets.AssetType
   pk: 59
@@ -264,6 +266,6 @@
     parent_type: 5
     schema: {"items": [4]}
     templates:
-      raw: "{{for(items)}}- {{items}}{{endfor}}"
-      markdown: "{{for(items)}}* {{items}}{{endfor}}"
+      raw: "{{for(items)}}- {{items}}\n{{endfor}}"
+      markdown: "{{for(items)}}* {{items}}\n{{endfor}}\n"
       proof_html: "<ul>{{for(items)}}<li>{{items}}</li>{{endfor}}</ul>"
