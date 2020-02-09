@@ -127,8 +127,8 @@
   fields:
     type_name: span-strikeout
     parent_type: 4
-      schema: {"text": 1}
-      templates:
-        raw: "{{text}}"
-        markdown: "~~{{text}}~~"
-        proof_html: "<del>{{text}}</del>"
+    schema: {"text": 1}
+    templates:
+      raw: "{{text}}"
+      markdown: "~~{{text}}~~"
+      proof_html: "<del>{{text}}</del>"
