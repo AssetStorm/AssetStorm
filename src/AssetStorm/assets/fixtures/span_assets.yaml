@@ -131,4 +131,4 @@
       templates:
         raw: "{{text}}"
         markdown: "~~{{text}}~~"
-        proof_html: "<strong><em>{{text}}</em></strong>"
+        proof_html: "<del>{{text}}</del>"
