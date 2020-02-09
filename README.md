@@ -7,7 +7,7 @@ PostgreSQL database. This can be used for publications like magazines
 or websites but also for a lot of other things.
 
 There is no frontend included with AssetStorm. It just exposes its 
-[API](https://github.com/pinae/AssetStorm/blob/master/AssetStormAPI.yaml).
+[API](https://github.com/pinae/AssetStorm/blob/master/src/AssetStormAPI.yaml).
 
 ## Development setup
 On Ubuntu install `postgresql` and `libpq-dev`.
