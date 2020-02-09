@@ -122,3 +122,13 @@
       raw: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
       markdown: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
       proof_html: "<br /><br />{{for(spans)}}{{spans}}{{endfor}}"
+- model: assets.AssetType
+  pk: 61
+  fields:
+    type_name: span-strikeout
+    parent_type: 4
+      schema: {"text": 1}
+      templates:
+        raw: "{{text}}"
+        markdown: "~~{{text}}~~"
+        proof_html: "<strong><em>{{text}}</em></strong>"
