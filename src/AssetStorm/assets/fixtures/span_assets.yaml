@@ -80,8 +80,8 @@
     schema: {"abbreviation": 1, "long_name": 1}
     templates:
       raw: "{{abbreviation}}"
-      markdown: "<abbr><abbr-long>{{abbreviation}}</abbr-long></abbr>"
-      proof_html: "<abbr><abbr-long>{{abbreviation}}</abbr-long></abbr>"
+      markdown: "<abbr>{{abbreviation}}<abbr-long>{{long_name}}</abbr-long></abbr>"
+      proof_html: "<abbr>{{abbreviation}}<abbr-long>{{long_name}}</abbr-long></abbr>"
 - model: assets.AssetType
   pk: 14
   fields:
