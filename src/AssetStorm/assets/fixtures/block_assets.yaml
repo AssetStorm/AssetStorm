@@ -78,6 +78,12 @@
         {{title}}
 
         {{for(images)}}{{images}}{{endfor}}
+      markdown: "<!---\ntype: block-image-album\ntitle: MD_BLOCK\n-->\n\n\
+      ### {{title}}\n\n<!---\nimages: MD_BLOCK\n-->\n\n\
+      {{for(images)}}{{images}}{{endfor}}\n\n<!--- -->\n\n"
+      proof_html: "<block-image-album><h1>{{title}}</h1>\
+      <div>{{for(images)}}{{images}}{{endfor}}</div>\
+      </block-image-album>"
 - model: assets.AssetType
   pk: 26
   fields:
