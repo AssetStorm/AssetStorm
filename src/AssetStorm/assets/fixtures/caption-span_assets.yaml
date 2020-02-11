@@ -10,6 +10,8 @@
     schema: {"text": 1}
     templates:
       raw: "{{text}}"
+      markdown: "{{text}}"
+      proof_html: "{{text}}"
 - model: assets.AssetType
   pk: 18
   fields:
@@ -18,6 +20,8 @@
     schema: {"text": 1}
     templates:
       raw: "{{text}}"
+      markdown: "*{{text}}*"
+      proof_html: "<em>{{text}}</em>"
 - model: assets.AssetType
   pk: 19
   fields:
@@ -26,6 +30,8 @@
     schema: {"text": 1}
     templates:
       raw: "{{text}}"
+      markdown: "**{{text}}**"
+      proof_html: "<strong>{{text}}</strong>"
 - model: assets.AssetType
   pk: 20
   fields:
@@ -34,3 +40,5 @@
     schema: {"link_text": 1, "url": 2}
     templates:
       raw: "{{link_text}}"
+      markdown: "[{{link_text}}]({{url}})"
+      proof_html: "<a href=\"{{url}}\">{{link_text}}</a>"
