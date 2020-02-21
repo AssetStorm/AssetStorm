@@ -12,6 +12,7 @@
       raw: "{{for(spans)}}{{spans}}{{endfor}}\n\n"
       markdown: "{{for(spans)}}{{spans}}{{endfor}}\n\n"
       proof_html: "<p>{{for(spans)}}{{spans}}{{endfor}}</p>"
+      sy_xml: "<paragraph type=\"standard\">{{for(spans)}}{{spans}}{{endfor}}</paragraph>"
 - model: assets.AssetType
   pk: 21
   fields:
@@ -205,6 +206,7 @@
       raw: "{{heading}}\n\n"
       markdown: "# {{heading}}\n\n"
       proof_html: "<h1>{{heading}}</h1>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 49
   fields:
@@ -215,6 +217,7 @@
       raw: "{{heading}}\n\n"
       markdown: "## {{heading}}\n\n"
       proof_html: "<h2>{{heading}}</h2>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 53
   fields:
@@ -225,6 +228,7 @@
       raw: "{{heading}}\n\n"
       markdown: "### {{heading}}\n\n"
       proof_html: "<h3>{{heading}}</h3>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 54
   fields:
@@ -235,6 +239,7 @@
       raw: "{{heading}}\n\n"
       markdown: "#### {{heading}}\n\n"
       proof_html: "<h4>{{heading}}</h4>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 55
   fields:
@@ -245,6 +250,7 @@
       raw: "{{heading}}\n\n"
       markdown: "##### {{heading}}\n\n"
       proof_html: "<h5>{{heading}}</h5>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 56
   fields:
@@ -255,6 +261,7 @@
       raw: "{{heading}}\n\n"
       markdown: "###### {{heading}}\n\n"
       proof_html: "<h6>{{heading}}</h6>"
+      sy_xml: "<subheading>{{heading}}</subheading>"
 - model: assets.AssetType
   pk: 58
   fields:
@@ -265,6 +272,9 @@
       raw: "{{for(items)}}1. {{items}}\n{{endfor}}"
       markdown: "{{for(items)}}1. {{items}}\n{{endfor}}\n"
       proof_html: "<ol>{{for(items)}}<li>{{items}}</li>{{endfor}}</ol>"
+      sy_xml: "<list type=\"standard\" style=\"decimal\">\
+      {{for(items)}}<listitem>{{items}}</listitem>{{endfor}}\
+      </list>"
 - model: assets.AssetType
   pk: 59
   fields:
@@ -275,3 +285,6 @@
       raw: "{{for(items)}}- {{items}}\n{{endfor}}"
       markdown: "{{for(items)}}* {{items}}\n{{endfor}}\n"
       proof_html: "<ul>{{for(items)}}<li>{{items}}</li>{{endfor}}</ul>"
+      sy_xml: "<list type=\"standard\" style=\"bullet\">\
+      {{for(items)}}<listitem>{{items}}</listitem>{{endfor}}\
+      </list>"

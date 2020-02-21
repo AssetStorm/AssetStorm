@@ -1,0 +1,52 @@
+- model: assets.AssetType
+  pk: 62
+  fields:
+    type_name: bibliography-reference
+- model: assets.AssetType
+  pk: 63
+  fields:
+    type_name: bibliography-reference-ct-intern
+    parent_type: 62
+    schema: {"author": 1,
+             "title": 1,
+             "subtitle": 1,
+             "issue": 1,
+             "year": 1,
+             "page": 1}
+    templates:
+      raw: "{{author}}, {{title}}, {{subtitle}}, c't {{issue}}/{{year}}, S. {{page}}"
+      markdown: "  - type: bibliography-reference-ct-intern\n\
+          author: {{author}}\n\
+          title: {{title}}\n\
+          subtitle: {{subtitle}}\n\
+          issue: {{issue}}\n\
+          year: {{year}}\n\
+          page: {{page}}"
+      proof_html: "<p>{{author}}, {{title}}, {{subtitle}}, c't {{issue}}/{{year}}, S. {{page}}</p>"
+      sy_xml: "<internal brand=\"ct\" year=\"{{year}}\" month=\"{{issue}}\" page=\"{{page}}\">\
+      {{author}}, {{title}}, {{subtitle}}, c't {{issue}}/{{year}}, S. {{page}}\
+      </internal>"
+- model: assets.AssetType
+  pk: 64
+  fields:
+    type_name: bibliography-reference-web
+    parent_type: 62
+    schema: {"url": 1}
+    templates:
+      raw: "{{url}}"
+      markdown: "  - type: bibliography-reference-web\n\
+          url: {{url}}"
+      proof_html: "<p><a href=\"{{url}}\">{{url}}</a></p>"
+      sy_xml: "<external href=\"{{url}}\">{{url}}</external>"
+- model: assets.AssetType
+  pk: 65
+  fields:
+    type_name: article-link-container
+    schema: {"link_description": 1, "link": 14}
+    templates:
+      raw: "{{link_description}}: {{link}}"
+      markdown: "  link_description: {{link_description}}\n  link: {{link}}"
+      proof_html: "<article-link>\
+      <article-link-description>{{link_description}}</article-link-description>: \
+      {{link}}</article-link>"
+      sy_xml: "<shorturlwrapper><label>{{link_description}}: </label>{{link}}</shorturlwrapper>"

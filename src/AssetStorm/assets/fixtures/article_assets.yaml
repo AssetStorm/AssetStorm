@@ -18,12 +18,17 @@
       teaser: 1
       content:
         - 5
+      article_link: 65
+      bibliography:
+        - 62
     templates:
       raw: "{{title}}\n\n\
       {{subtitle}}\n\n\
       {{teaser}}\n\n\
       Von {{author}}\n\n\
-      {{for(content)}}{{content}}{{endfor}}\n\n"
+      {{for(content)}}{{content}}{{endfor}}\n\n\
+      {{article_link}}\n\n\
+      Literatur\n{{for(bibliography)}} - {{bibliography}}\n{{bibliography}}\n\n"
       markdown: "<!---\n\
       type: article-standard\n\
       x_id: {{x_id}}\n\
@@ -34,7 +39,10 @@
       subtitle: MD_BLOCK\n-->\n\n## {{subtitle}}\n\n<!---\n\
       teaser: MD_BLOCK\n-->\n\n**{{teaser}}**\n\n<!---\n\
       author: MD_BLOCK\n-->\n\n{{author}}\n\n<!---\n\
-      content: MD_BLOCK\n-->\n\n{{for(content)}}{{content}}{{endfor}}<!--- -->"
+      content: MD_BLOCK\n-->\n\n{{for(content)}}{{content}}{{endfor}}<!---\n\
+      article_link:\n{{article_link}}\n\
+      bibliography:\n{{for(bibliography)}}{{bibliography}}\n{{bibliography}}\
+      -->"
       proof_html: "<article-standard>\
       <x_id>{{x_id}}</x_id>\
       <catchphrase>{{catchphrase}}</catchphrase>\
@@ -44,4 +52,18 @@
       <teaser>{{teaser}}</teaser>\
       <author>Von {{author}}</author>\
       {{for(content)}}{{content}}{{endfor}}\
+      {{article_link}}
+      <div class=\"bibliography\"><h3>Literatur</h3>\
+      <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{bibliography}}</ol></div>
       </article-standard>"
+      sy_xml: "<document dbref=\"{{x_id}}\">\
+      <title>{{subtitle}}</title>\
+      <subtitle>{{title}}</subtitle>\
+      <abstract>{{teaser}}</abstract>\
+      <textel>\
+      {{for(content)}}{{content}}{{endfor}}\
+      {{article_link}}
+      <bibliography><title>Literatur</title>\
+      {{for(bibliography)}}{{bibliography}}{{bibliography}}
+      </bibliography>\
+      </textel></document>"

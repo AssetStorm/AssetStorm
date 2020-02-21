@@ -8,7 +8,7 @@ PYTHON_GLOBAL := $(shell /usr/bin/which python3.6)
 
 PY_VERSION := 3.6
 
-VENV_DIRNAME := .venv
+VENV_DIRNAME := ../env
 VENV := $(BASE)/$(VENV_DIRNAME)
 
 # The venv `python` executable.
@@ -22,7 +22,7 @@ PIP_COMMAND := $(PYTHON) -m pip
 PIP := $(VENV)/bin/pip$(PY_VERSION)
 
 PSERVE := $(VENV)/bin/pserve
-PG_CONNECTION_PARAMS := --host=127.0.0.1 --port=5436 --dbname=asst_dev
+PG_CONNECTION_PARAMS := --host=127.0.0.1 --port=5432 --dbname=assetstorm
 PSQL := psql -P pager=off $(PG_CONNECTION_PARAMS)
 
 .DEFAULT_GOAL := build
@@ -65,7 +65,7 @@ dev.psql:
 
 .PHONY: test
 test:
-	$(VENV)/bin/python manage.py test AssetStorm
+    DEBUG=True $(VENV)/bin/python manage.py test AssetStorm
 	# $(VENV)/bin/python AssetStorm/manage.py test AssetStorm
 
 

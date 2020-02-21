@@ -12,6 +12,7 @@
       raw: "{{text}}"
       markdown: "{{text}}"
       proof_html: "{{text}}"
+      sy_xml: "{{text}}"
 - model: assets.AssetType
   pk: 7
   fields:
@@ -22,6 +23,7 @@
       raw: "{{text}}"
       markdown: "*{{text}}*"
       proof_html: "<em>{{text}}</em>"
+      sy_xml: "<italic>{{text}}</italic>"
 - model: assets.AssetType
   pk: 8
   fields:
@@ -32,6 +34,7 @@
       raw: "{{text}}"
       markdown: "**{{text}}**"
       proof_html: "<strong>{{text}}</strong>"
+      sy_xml: "<bold>{{text}}</bold>"
 - model: assets.AssetType
   pk: 9
   fields:
@@ -42,6 +45,7 @@
       raw: "{{listing_text}}"
       markdown: "`{{listing_text}}`"
       proof_html: "<code>{{listing_text}}</code>"
+      sy_xml: "<code>{{listing_text}}</code>"
 - model: assets.AssetType
   pk: 10
   fields:
@@ -52,6 +56,7 @@
       raw: "{{path}}"
       markdown: "<fs-path>{{path}}</fs-path>"
       proof_html: "<fs-path>{{path}}</fs-path>"
+      sy_xml: "<code>{{listing_text}}</code>"
 - model: assets.AssetType
   pk: 11
   fields:
@@ -62,6 +67,7 @@
       raw: "{{link_text}}"
       markdown: "[{{link_text}}]({{url}})"
       proof_html: "<a href=\"{{url}}\">{{link_text}}</a>"
+      sy_xml: "<a href=\"{{url}}\">{{link_text}}</a>"
 - model: assets.AssetType
   pk: 12
   fields:
@@ -72,6 +78,7 @@
       raw: "{{program_name}}"
       markdown: "<program-name>{{program_name}}</program-name>"
       proof_html: "<program-name>{{program_name}}</program-name>"
+      sy_xml: "<code>{{program_name}}</code>"
 - model: assets.AssetType
   pk: 13
   fields:
@@ -82,6 +89,7 @@
       raw: "{{abbreviation}}"
       markdown: "<abbr>{{abbreviation}}<abbr-long>{{long_name}}</abbr-long></abbr>"
       proof_html: "<abbr>{{abbreviation}}<abbr-long>{{long_name}}</abbr-long></abbr>"
+      sy_xml: "{{abbreviation}}"
 - model: assets.AssetType
   pk: 14
   fields:
@@ -92,6 +100,7 @@
       raw: "ct.de/@@@@"
       markdown: "<ctlink />"
       proof_html: "<ctlink />"
+      sy_xml: "<shorturl></shorturl>"
 - model: assets.AssetType
   pk: 50
   fields:
@@ -102,6 +111,7 @@
       raw: "{{text}}"
       markdown: "***{{text}}***"
       proof_html: "<strong><em>{{text}}</em></strong>"
+      sy_xml: "<bold><italic>{{text}}</bold></italic>"
 - model: assets.AssetType
   pk: 57
   fields:
@@ -112,6 +122,7 @@
       raw: "{{for(spans)}}{{spans}}{{endfor}}"
       markdown: "{{for(spans)}}{{spans}}{{endfor}}"
       proof_html: "{{for(spans)}}{{spans}}{{endfor}}"
+      sy_xml: "{{for(spans)}}{{spans}}{{endfor}}"
 - model: assets.AssetType
   pk: 60
   fields:
@@ -122,6 +133,7 @@
       raw: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
       markdown: "\n\n{{for(spans)}}{{spans}}{{endfor}}"
       proof_html: "<br /><br />{{for(spans)}}{{spans}}{{endfor}}"
+      sy_xml: "<linebreak/><linebreak/>{{for(spans)}}{{spans}}{{endfor}}"
 - model: assets.AssetType
   pk: 61
   fields:
@@ -132,3 +144,4 @@
       raw: "{{text}}"
       markdown: "~~{{text}}~~"
       proof_html: "<del>{{text}}</del>"
+      sy_xml: "<subscript>{{text}}</subscript>"

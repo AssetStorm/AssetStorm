@@ -934,7 +934,7 @@ class TestGetTypesForParentView(TestCase):
         self.assertEqual("application/json", response['content-type'])
         correct_spans = ['span-strong-emphasized', 'span-ct-link', 'span-abbreviation', 'span-program',
                          'span-link', 'span-path', 'span-listing', 'span-strong', 'span-emphasized',
-                         'span-regular']
+                         'span-regular', 'span-container', 'span-line-break-container', 'span-strikeout']
         loaded_spans = json.loads(response.content)
         self.assertEqual(len(correct_spans), len(loaded_spans))
         for span in correct_spans:
