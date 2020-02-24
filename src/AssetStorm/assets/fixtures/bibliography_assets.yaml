@@ -45,7 +45,7 @@
     schema: {"link_description": 1, "link": 14}
     templates:
       raw: "{{link_description}}: {{link}}"
-      markdown: "  link_description: {{link_description}}\n  link: {{link}}"
+      markdown: "  type: article-link-container\n  link_description: {{link_description}}\n  link: {{link}}"
       proof_html: "<article-link>\
       <article-link-description>{{link_description}}:</article-link-description> \
       {{link}}</article-link>"
