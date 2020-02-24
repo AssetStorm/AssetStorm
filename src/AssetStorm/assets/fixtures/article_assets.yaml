@@ -62,8 +62,8 @@
       <abstract>{{teaser}}</abstract>\
       <textel>\
       {{for(content)}}{{content}}{{endfor}}\
-      {{article_link}}
+      {{article_link}}\
       <bibliography><title>Literatur</title>\
-      {{for(bibliography)}}{{bibliography}}{{endfor}}
+      {{for(bibliography)}}{{bibliography}}{{endfor}}\
       </bibliography>\
       </textel></document>"
