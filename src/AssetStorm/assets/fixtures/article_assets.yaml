@@ -28,7 +28,7 @@
       Von {{author}}\n\n\
       {{for(content)}}{{content}}{{endfor}}\n\n\
       {{article_link}}\n\n\
-      Literatur\n{{for(bibliography)}} - {{bibliography}}\n{{bibliography}}\n\n"
+      Literatur\n{{for(bibliography)}} - {{bibliography}}\n{{endfor}}\n\n"
       markdown: "<!---\n\
       type: article-standard\n\
       x_id: {{x_id}}\n\
@@ -41,7 +41,7 @@
       author: MD_BLOCK\n-->\n\n{{author}}\n\n<!---\n\
       content: MD_BLOCK\n-->\n\n{{for(content)}}{{content}}{{endfor}}<!---\n\
       article_link:\n{{article_link}}\n\
-      bibliography:\n{{for(bibliography)}}{{bibliography}}\n{{bibliography}}\
+      bibliography:\n{{for(bibliography)}}{{bibliography}}\n{{endfor}}\
       -->"
       proof_html: "<article-standard>\
       <x_id>{{x_id}}</x_id>\
@@ -54,7 +54,7 @@
       {{for(content)}}{{content}}{{endfor}}\
       {{article_link}}
       <div class=\"bibliography\"><h3>Literatur</h3>\
-      <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{bibliography}}</ol></div>
+      <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{endfor}}</ol></div>
       </article-standard>"
       sy_xml: "<document dbref=\"{{x_id}}\">\
       <title>{{subtitle}}</title>\
@@ -64,6 +64,6 @@
       {{for(content)}}{{content}}{{endfor}}\
       {{article_link}}
       <bibliography><title>Literatur</title>\
-      {{for(bibliography)}}{{bibliography}}{{bibliography}}
+      {{for(bibliography)}}{{bibliography}}{{endfor}}
       </bibliography>\
       </textel></document>"
