@@ -57,13 +57,13 @@
       <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{endfor}}</ol></div>\
       </article-standard>"
       sy_xml: "<document dbref=\"{{x_id}}\">\
-      <title>{{subtitle}}</title>\
-      <subtitle>{{title}}</subtitle>\
-      <abstract>{{teaser}}</abstract>\
-      <textel>\
-      {{for(content)}}{{content}}{{endfor}}\
-      {{article_link}}\
+      <title>{{subtitle}}</title>\n\
+      <subtitle>{{title}}</subtitle>\n\
+      <abstract>{{teaser}}</abstract>\n\
+      <textel>\n\
+      {{for(content)}}{{content}}\n{{endfor}}\
+      {{article_link}}\n\
       <bibliography><title>Literatur</title>\
       {{for(bibliography)}}{{bibliography}}{{endfor}}\
-      </bibliography>\
-      </textel></document>"
+      </bibliography>\n\
+      </textel>\n</document>"
