@@ -47,6 +47,6 @@
       raw: "{{link_description}}: {{link}}"
       markdown: "  link_description: {{link_description}}\n  link: {{link}}"
       proof_html: "<article-link>\
-      <article-link-description>{{link_description}}</article-link-description>: \
+      <article-link-description>{{link_description}}:</article-link-description> \
       {{link}}</article-link>"
       sy_xml: "<shorturlwrapper><label>{{link_description}}: </label>{{link}}</shorturlwrapper>"
