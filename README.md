@@ -10,7 +10,8 @@ There is no frontend included with AssetStorm. It just exposes its
 [API](https://github.com/pinae/AssetStorm/blob/master/src/AssetStormAPI.yaml).
 
 ## Development setup
-On Ubuntu install `postgresql` and `libpq-dev`.
+On Ubuntu install `postgresql` and `libpq-dev`. 
+On Arch it is `postgresql` and `postgresql-libs`.
 
 After that create a virtual environment and install the requirements:
 ```shell script
