@@ -52,9 +52,9 @@
       <teaser>{{teaser}}</teaser>\
       <author>Von {{author}}</author>\
       {{for(content)}}{{content}}{{endfor}}\
-      {{article_link}}
+      {{article_link}}\
       <div class=\"bibliography\"><h3>Literatur</h3>\
-      <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{endfor}}</ol></div>
+      <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{endfor}}</ol></div>\
       </article-standard>"
       sy_xml: "<document dbref=\"{{x_id}}\">\
       <title>{{subtitle}}</title>\
