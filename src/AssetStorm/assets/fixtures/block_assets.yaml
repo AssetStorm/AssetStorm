@@ -12,7 +12,7 @@
       raw: "{{for(spans)}}{{spans}}{{endfor}}\n\n"
       markdown: "{{for(spans)}}{{spans}}{{endfor}}\n\n"
       proof_html: "<p>{{for(spans)}}{{spans}}{{endfor}}</p>"
-      sy_xml: "<paragraph type=\"standard\">{{for(spans)}}{{spans}}{{endfor}}</paragraph>"
+      sy_xml: "<paragraph type=\"standard\" id=\"{{$id}}\">{{for(spans)}}{{spans}}{{endfor}}</paragraph>"
 - model: assets.AssetType
   pk: 21
   fields:
