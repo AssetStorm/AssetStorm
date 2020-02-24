@@ -56,7 +56,7 @@
       <div class=\"bibliography\"><h3>Literatur</h3>\
       <ol>{{for(bibliography)}}<li>{{bibliography}}</li>{{endfor}}</ol></div>\
       </article-standard>"
-      sy_xml: "<document dbref=\"{{x_id}}\">\
+      sy_xml: "<document dbref=\"{{x_id}}\">\n\
       <title>{{subtitle}}</title>\n\
       <subtitle>{{title}}</subtitle>\n\
       <abstract>{{teaser}}</abstract>\n\
