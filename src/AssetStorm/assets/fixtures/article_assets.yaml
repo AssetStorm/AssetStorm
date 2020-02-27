@@ -67,3 +67,34 @@
       {{for(bibliography)}}{{bibliography}}{{endfor}}\
       </bibliography>\n\
       </textel>\n</document>"
+- model: assets.AssetType
+  pk: 69
+  fields:
+    type_name: article-table-of-contents
+    parent_type: 51
+    schema:
+      title: 1
+      x_id: 1
+      content:
+        - 66
+    templates:
+      raw: "{{title}}\n\n\
+      {{for(content)}}{{content}}\n{{endfor}}\n\n"
+      markdown: "<!---\n\
+      type: article-standard\n\
+      x_id: {{x_id}}\n\
+      title: MD_BLOCK\n-->\n\n\
+      # {{title}}\n\n\
+      <!---\n\
+      content: MD_BLOCK\n-->\n\n\
+      {{for(content)}}{{content}}{{endfor}}\n\n\
+      -->"
+      proof_html: "<article-table-of-contents>\
+      <h1>{{title}}</h1>\
+      <table>{{for(content)}}{{content}}{{endfor}}</table>\
+      </article-table-of-contents>"
+      sy_xml: "<document dbref=\"{{x_id}}\">\n\
+      <title>{{title}}</title>\n\
+      <textel>\n\
+      {{for(content)}}{{content}}\n{{endfor}}\
+      </textel>\n</document>"
