@@ -76,7 +76,7 @@
       title: 1
       x_id: 1
       content:
-        - 66
+        - 70
     templates:
       raw: "{{title}}\n\n\
       {{for(content)}}{{content}}\n{{endfor}}\n\n"
@@ -91,7 +91,7 @@
       -->"
       proof_html: "<article-table-of-contents>\
       <h1>{{title}}</h1>\
-      <table>{{for(content)}}{{content}}{{endfor}}</table>\
+      {{for(content)}}{{content}}{{endfor}}\
       </article-table-of-contents>"
       sy_xml: "<document dbref=\"{{x_id}}\">\n\
       <title>{{title}}</title>\n\

@@ -5,13 +5,13 @@
 - model: assets.AssetType
   pk: 67
   fields:
-    type_name: toc-block
+    type_name: toc-heading-container
     parent_type: 66
     schema: {"title": 1, "entries": [66]}
     templates:
       raw: "{{title}}\n{{for(entries)}}  {{entries}}\n{{endfor}}"
       markdown: "<!---\n\
-      type: toc-block\n\
+      type: toc-heading-container\n\
       title: MD_BLOCK\n\
       -->\n\n## {{title}}\n\n<!---\n\
       entries: MD_BLOCK\n\
@@ -36,3 +36,21 @@
       -->\n\n{{for(spans)}}{{spans}}{{endfor}}\n\n<!--- --->"
       proof_html: "<tr><td class=\"toc-page\">{{page}}</td><td>{{for(spans)}}{{spans}}{{endfor}}</td></tr>"
       sy_xml: "<tocentry page=\"{{page}}\">\n{{for(spans)}}{{spans}}{{endfor}}\n</tocentry>"
+- model: assets.AssetType
+  pk: 70
+  fields:
+    type_name: toc-block
+- model: assets.AssetType
+  pk: 71
+  fields:
+    type_name: toc-block-main
+    parent_type: 70
+    schema: {"entries": [66]}
+    templates:
+      raw: "{{for(entries)}}{{entries}}{{endfor}}"
+      markdown: "<!---\n\
+      type: toc-block\n\
+      entries: MD_BLOCK\n\
+      -->\n\n{{for(entries)}}{{entries}}{{endfor}}\n\n<!--- --->"
+      proof_html: "<table>{{for(entries)}}{{entries}}{{endfor}}</table>"
+      sy_xml: "<toc>\n{{for(entries)}}{{entries}}\n{{endfor}}</toc>"
