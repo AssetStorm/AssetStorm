@@ -81,7 +81,7 @@
       raw: "{{title}}\n\n\
       {{for(content)}}{{content}}\n{{endfor}}\n\n"
       markdown: "<!---\n\
-      type: article-standard\n\
+      type: article-table-of-contents\n\
       x_id: {{x_id}}\n\
       title: MD_BLOCK\n-->\n\n\
       # {{title}}\n\n\

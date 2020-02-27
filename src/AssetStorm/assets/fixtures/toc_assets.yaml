@@ -20,7 +20,7 @@
       <h2>{{title}}</h2>\
       <table>{{for(entries)}}{{entries}}{{endfor}}</table>\
       </td></tr>"
-      sy_xml: "<tocentry>\n  {{title}}\n{{for(entries)}}  {{entries}}\n{{endfor}}</tocentry>"
+      sy_xml: "<tocentry>\n{{title}}\n{{for(entries)}}{{entries}}\n{{endfor}}</tocentry>"
 - model: assets.AssetType
   pk: 68
   fields:
@@ -54,3 +54,23 @@
       -->\n\n{{for(entries)}}{{entries}}{{endfor}}\n\n<!--- --->"
       proof_html: "<table>{{for(entries)}}{{entries}}{{endfor}}</table>"
       sy_xml: "<toc>\n{{for(entries)}}{{entries}}\n{{endfor}}</toc>"
+- model: assets.AssetType
+  pk: 72
+  fields:
+    type_name: toc-block-box
+    parent_type: 70
+    schema: {"toc_block": 71, "content": [5]}
+    templates:
+      raw: "-------\n{{toc_block}}\n\n{{for(content)}}{{content}}\n{{endfor}}-------"
+      markdown: "<!---\n\
+      type: toc-block-box\n\
+      toc_block: MD_BLOCK\n\
+      -->\n\n{{toc_block}}\n\n<!---\n\
+      content: MD_BLOCK\n\
+      -->\n\n{{for(content)}}{{content}}\n\n{{endfor}}\n\n\
+      <!--- --->"
+      proof_html: "<toc-block-box>{{toc_block}}{{for(content)}}{{content}}{{endfor}}</toc-block-box>"
+      sy_xml: "<box type=\"default\">\n\
+      {{toc_block}}\n\
+      {{for(content)}}{{content}}\n{{endfor}}\
+      </box>"
