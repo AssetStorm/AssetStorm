@@ -88,7 +88,7 @@
       <!---\n\
       content: MD_BLOCK\n-->\n\n\
       {{for(content)}}{{content}}{{endfor}}\n\n\
-      -->"
+      <!--- -->"
       proof_html: "<article-table-of-contents>\
       <h1>{{title}}</h1>\
       {{for(content)}}{{content}}{{endfor}}\
