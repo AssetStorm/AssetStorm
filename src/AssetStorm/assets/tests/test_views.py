@@ -716,6 +716,9 @@ class TestQueryView(TestCase):
         'span_assets.yaml',
         'caption-span_assets.yaml',
         'block_assets.yaml',
+        'article_assets.yaml',
+        'bibliography_assets.yaml',
+        'toc_assets.yaml',
         'table.yaml',
         'enum_types.yaml'
     ]
@@ -819,6 +822,55 @@ class TestQueryView(TestCase):
             "type_id": box.t.pk,
             "raw_content_snippet": box.raw_content_cache[:500]
         }, found_assets)
+
+    def test_find_filter_id_only(self):
+        article_tree = {
+            "type": "article-standard",
+            "working_title": "Testartikel",
+            "x_id": "123456789123456789",
+            "catchphrase": "Test: Artikel",
+            "column": "Test",
+            "title": "Testarino",
+            "subtitle": "Ein Artikel zum Testen",
+            "author": "Max Mustermann",
+            "teaser": "Der Teaser macht Lust aufs Lesen — und Testen.",
+            "content": [
+                {"type": "block-paragraph", "spans": [
+                    {"type": "span-regular", "text": "Haupttext des Artikels."}
+                ]}
+            ],
+            "article_link": {
+                "type": "article-link-container",
+                "link_description": "Link-Referenz",
+                "link": {"type": "span-ct-link"}
+            },
+            "bibliography": []
+        }
+        save_response = self.client.post(reverse("save_asset"), data=article_tree, content_type="application/json")
+        load_response = self.client.get(reverse("load_asset"), data=dict(id=json.loads(save_response.content)["id"]))
+        loaded_article_tree = json.loads(load_response.content, encoding='utf-8')
+
+        def compare_article_trees(expected, actual):
+            for key in expected.keys():
+                if type(expected[key]) is dict:
+                    compare_article_trees(expected[key], actual[key])
+                elif type(expected[key]) is list:
+                    [compare_article_trees(item, actual[key][i]) for i, item in enumerate(expected[key])]
+                else:
+                    self.assertEqual(expected[key], actual[key])
+
+        compare_article_trees(article_tree, loaded_article_tree)
+        article = Asset.objects.get(pk=json.loads(save_response.content)["id"])
+        self.assertEqual(str(article.pk), loaded_article_tree["id"])
+        article.render_template()
+        filter_response = self.client.post(reverse("filter_assets"),
+                                           data={"id": str(article.pk)},
+                                           content_type="application/json")
+        found_assets = json.loads(filter_response.content)["assets"]
+        self.assertEqual(len(found_assets), 1)
+        self.assertEqual(str(article.pk), found_assets[0]["id"])
+        self.assertEqual(52, found_assets[0]['type_id'])
+        self.assertTrue(found_assets[0]['raw_content_snippet'].startswith(article_tree['title']))
 
 
 class TestGetTemplateView(TestCase):
