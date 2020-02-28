@@ -14,7 +14,7 @@
       type: toc-heading-container\n\
       title: {{title}}\n\
       entries: MD_BLOCK\n\
-      -->\n\n{{for(entries)}}{{entries}}{{endfor}}\n\n<!--- --->"
+      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- --->"
       proof_html: "<tr><td colspan=\"2\">\
       <h2>{{title}}</h2>\
       <table>{{for(entries)}}{{entries}}{{endfor}}</table>\
