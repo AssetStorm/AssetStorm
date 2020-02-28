@@ -12,8 +12,7 @@
       raw: "{{title}}\n{{for(entries)}}  {{entries}}\n{{endfor}}"
       markdown: "<!---\n\
       type: toc-heading-container\n\
-      title: MD_BLOCK\n\
-      -->\n\n## {{title}}\n\n<!---\n\
+      title: {{title}}\n\
       entries: MD_BLOCK\n\
       -->\n\n{{for(entries)}}{{entries}}{{endfor}}\n\n<!--- --->"
       proof_html: "<tr><td colspan=\"2\">\
@@ -51,7 +50,7 @@
       markdown: "<!---\n\
       type: toc-block\n\
       entries: MD_BLOCK\n\
-      -->\n\n{{for(entries)}}{{entries}}{{endfor}}\n\n<!--- --->"
+      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- --->"
       proof_html: "<table>{{for(entries)}}{{entries}}{{endfor}}</table>"
       sy_xml: "<toc>\n{{for(entries)}}{{entries}}\n{{endfor}}</toc>"
 - model: assets.AssetType
