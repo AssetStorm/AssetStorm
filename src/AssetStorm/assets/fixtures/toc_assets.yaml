@@ -14,7 +14,7 @@
       type: toc-heading-container\n\
       title: {{title}}\n\
       entries: MD_BLOCK\n\
-      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- --->"
+      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- -->"
       proof_html: "<tr><td colspan=\"2\">\
       <h2>{{title}}</h2>\
       <table>{{for(entries)}}{{entries}}{{endfor}}</table>\
@@ -32,7 +32,7 @@
       type: toc-small\n\
       page: {{page}}\n\
       text: MD_BLOCK\n\
-      -->\n\n{{for(spans)}}{{spans}}{{endfor}}\n\n<!--- --->"
+      -->\n\n{{for(spans)}}{{spans}}{{endfor}}\n\n<!--- -->"
       proof_html: "<tr><td class=\"toc-page\">{{page}}</td><td>{{for(spans)}}{{spans}}{{endfor}}</td></tr>"
       sy_xml: "<tocentry page=\"{{page}}\">\n{{for(spans)}}{{spans}}{{endfor}}\n</tocentry>"
 - model: assets.AssetType
@@ -50,7 +50,7 @@
       markdown: "<!---\n\
       type: toc-block\n\
       entries: MD_BLOCK\n\
-      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- --->"
+      -->\n\n{{for(entries)}}{{entries}}\n\n{{endfor}}<!--- -->"
       proof_html: "<table>{{for(entries)}}{{entries}}{{endfor}}</table>"
       sy_xml: "<toc>\n{{for(entries)}}{{entries}}\n{{endfor}}</toc>"
 - model: assets.AssetType
@@ -67,7 +67,7 @@
       -->\n\n{{toc_block}}\n\n<!---\n\
       content: MD_BLOCK\n\
       -->\n\n{{for(content)}}{{content}}\n\n{{endfor}}\
-      <!--- --->"
+      <!--- -->"
       proof_html: "<toc-block-box>{{toc_block}}{{for(content)}}{{content}}{{endfor}}</toc-block-box>"
       sy_xml: "<box type=\"default\">\n\
       {{toc_block}}\n\
