@@ -31,7 +31,7 @@
       markdown: "<!---\n\
       type: toc-small\n\
       page: {{page}}\n\
-      text: MD_BLOCK\n\
+      spans: MD_BLOCK\n\
       -->\n\n{{for(spans)}}{{spans}}{{endfor}}\n\n<!--- -->"
       proof_html: "<tr><td class=\"toc-page\">{{page}}</td><td>{{for(spans)}}{{spans}}{{endfor}}</td></tr>"
       sy_xml: "<tocentry page=\"{{page}}\">\n{{for(spans)}}{{spans}}{{endfor}}\n</tocentry>"
