@@ -293,32 +293,47 @@ def get_schema(request):
         return JsonResponse(data={
             "Error": "You must supply a type_name or a type_id as GET params."
         }, status=400)
-    try:
-        if "type_id" in request.GET:
+    if "type_id" in request.GET:
+        try:
             ato = AssetType.objects.get(pk=int(request.GET["type_id"]))
-        else:
+        except AssetType.DoesNotExist:
+            return JsonResponse(data={
+                "Error": "The AssetType with id=" + request.GET["type_id"] + " does not exist."
+            }, status=400)
+    else:
+        try:
             ato = AssetType.objects.get(type_name=request.GET["type_name"])
-    except AssetType.DoesNotExist:
-        return JsonResponse(data={
-            "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
-        }, status=400)
+        except AssetType.DoesNotExist:
+            return JsonResponse(data={
+                "Error": "The AssetType \"" + request.GET["type_name"] + "\" does not exist."
+            }, status=400)
     if ato.schema is None:
         return JsonResponse(data={})
     return JsonResponse(data=ato.schema)
 
 
 def get_types_for_parent(request):
-    if "parent_type_name" not in request.GET:
+    if "parent_type_name" not in request.GET and "parent_type_id" not in request.GET:
         return HttpResponseBadRequest(content=json.dumps({
-            "Error": "You must supply parent_type_name as GET param."
+            "Error": "You must supply parent_type_name or parent_type_id as GET param."
         }), content_type="application/json")
-    try:
-        parent = AssetType.objects.get(type_name=request.GET["parent_type_name"])
-    except AssetType.DoesNotExist:
-        return HttpResponseBadRequest(content=json.dumps({
-            "Error": "The AssetType \"" + request.GET["parent_type_name"] + "\" does not exist."
-        }), content_type="application/json")
+    if "parent_type_id" in request.GET:
+        try:
+            parent = AssetType.objects.get(pk=int(request.GET["parent_type_id"]))
+        except AssetType.DoesNotExist:
+            return HttpResponseBadRequest(content=json.dumps({
+                "Error": "The AssetType with id=" + request.GET["parent_type_id"] + " does not exist."
+            }), content_type="application/json")
+    else:
+        try:
+            parent = AssetType.objects.get(type_name=request.GET["parent_type_name"])
+        except AssetType.DoesNotExist:
+            return HttpResponseBadRequest(content=json.dumps({
+                "Error": "The AssetType \"" + request.GET["parent_type_name"] + "\" does not exist."
+            }), content_type="application/json")
     children = [child.type_name for child in parent.children.all()]
+    if len(children) < 1:
+        children = [parent.type_name]
     return HttpResponse(content=json.dumps(children),
                         content_type="application/json")
 
