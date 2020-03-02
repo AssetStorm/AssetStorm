@@ -993,6 +993,37 @@ class TestGetTypesForParentView(TestCase):
             self.assertIn(span, loaded_spans)
 
 
+class TestUpdateCachesView(TestCase):
+    fixtures = [
+        'span_assets.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_cache_rebuild(self):
+        save_response = self.client.post(
+            reverse("save_asset"),
+            data={'type': 'span-regular', 'text': 'foo'},
+            content_type="application/json")
+        self.assertEqual(200, save_response.status_code)
+        asset_id = json.loads(str(save_response.content, encoding="utf-8"))['id']
+        asset = Asset.objects.get(pk=asset_id)
+        self.assertIsNone(asset.content_cache)
+        self.assertIsNone(asset.raw_content_cache)
+        update_cache_response = self.client.get(reverse("update_caches"))
+        self.assertEqual(200, update_cache_response.status_code)
+        self.assertEqual({'Success': True, 'rebuilt_content_caches': 1, 'rendered_raw_templates': 1},
+                         json.loads(str(update_cache_response.content, encoding="utf-8")))
+        asset = Asset.objects.get(pk=asset_id)
+        self.assertEqual({'type': 'span-regular', 'text': 'foo', 'id': str(asset.pk)}, asset.content_cache)
+        self.assertEqual('foo', asset.raw_content_cache)
+        update_cache_response = self.client.get(reverse("update_caches"))
+        self.assertEqual(200, update_cache_response.status_code)
+        self.assertEqual({'Success': True, 'rebuilt_content_caches': 0, 'rendered_raw_templates': 0},
+                         json.loads(str(update_cache_response.content, encoding="utf-8")))
+
+
 class TestDeliverOpenApiDefinition(TestCase):
     def setUp(self) -> None:
         self.client = Client()

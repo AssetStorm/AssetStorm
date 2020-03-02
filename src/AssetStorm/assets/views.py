@@ -323,7 +323,23 @@ def get_types_for_parent(request):
                         content_type="application/json")
 
 
-def deliver_open_api_definition(request):
+def update_caches(request=None) -> HttpResponse:
+    statistics = {
+        'rebuilt_content_caches': 0,
+        'rendered_raw_templates': 0
+    }
+    for asset in Asset.objects.filter(content_cache__isnull=True):
+        asset.content
+        statistics['rebuilt_content_caches'] += 1
+    for asset in Asset.objects.filter(raw_content_cache__isnull=True):
+        asset.render_template()
+        statistics['rendered_raw_templates'] += 1
+    statistics['Success'] = True
+    return HttpResponse(content=json.dumps(statistics),
+                        content_type="application/json")
+
+
+def deliver_open_api_definition(request) -> HttpResponse:
     with open("AssetStormAPI.yaml", 'r') as yaml_file:
         api_definition = yaml.safe_load(yaml_file.read())
     if os.getenv("SERVER_NAME") is not None:
