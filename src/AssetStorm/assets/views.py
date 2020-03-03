@@ -369,3 +369,25 @@ def live(request):
         return HttpResponse(content="", content_type="text/plain", status=200)
     except OperationalError:
         return HttpResponse(content="", content_type="text/plain", status=400)
+
+
+def delete_all_assets(request):
+    if request.method != "DELETE":
+        return HttpResponseBadRequest(content=json.dumps({
+            "Error": "Delete all assets by using a HTTP DELETE command. Other methods are disallowed."
+        }), content_type="application/json")
+    delete_statistics = {}
+    delete_count, detailed_delete_info = Asset.objects.all().delete()
+    delete_statistics["Asset"] = delete_count
+    delete_statistics["Asset_in_detail"] = detailed_delete_info
+    delete_count, detailed_delete_info = Text.objects.all().delete()
+    delete_statistics["Text"] = delete_count
+    delete_statistics["Text_in_detail"] = detailed_delete_info
+    delete_count, detailed_delete_info = UriElement.objects.all().delete()
+    delete_statistics["UriElement"] = delete_count
+    delete_statistics["UriElement_in_detail"] = detailed_delete_info
+    delete_count, detailed_delete_info = Enum.objects.all().delete()
+    delete_statistics["Enum"] = delete_count
+    delete_statistics["Enum_in_detail"] = detailed_delete_info
+    return HttpResponse(content=json.dumps(delete_statistics),
+                        content_type="application/json")

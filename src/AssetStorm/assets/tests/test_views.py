@@ -968,7 +968,7 @@ class TestGetTypesForParentView(TestCase):
         error_response = self.client.get(reverse("get_types_for_parent"))
         self.assertEqual(400, error_response.status_code)
         self.assertEqual("application/json", error_response['content-type'])
-        self.assertEqual({"Error": "You must supply parent_type_name as GET param."},
+        self.assertEqual({"Error": "You must supply parent_type_name or parent_type_id as GET param."},
                          json.loads(error_response.content))
 
     def test_unknown_parent_type_name(self):
@@ -1049,3 +1049,67 @@ class TestDeliverOpenApiDefinition(TestCase):
             self.assertEqual("application/json", response['content-type'])
             api_def = json.loads(response.content)
             self.assertEqual({'url': 'https://test.org/foo/bar/baz'}, api_def['servers'][0])
+
+
+class TestDeleteAllAssets(TestCase):
+    fixtures = [
+        'block_assets.yaml',
+        'span_assets.yaml'
+    ]
+
+    def setUp(self) -> None:
+        self.client = Client()
+
+    def test_delete(self):
+        save_response = self.client.post(
+            reverse("save_asset"),
+            data={'type': 'block-paragraph', 'spans': [
+                {'type': 'span-regular', 'text': 'foo '},
+                {'type': 'span-link', 'link_text': 'bar', 'url': 'https://ct.de'},
+                {'type': 'span-regular', 'text': ' baz.'}
+            ]},
+            content_type="application/json")
+        self.assertEqual(200, save_response.status_code)
+        asset_id = json.loads(str(save_response.content, encoding="utf-8"))['id']
+        asset = Asset.objects.get(pk=asset_id)
+        self.assertEqual({
+            "type": "block-paragraph",
+            "id": str(asset.pk),
+            "spans": [
+                {"type": "span-regular",
+                 "id": str(asset.content_ids["spans"][0]),
+                 "text": "foo "},
+                {"type": "span-link",
+                 "id": str(asset.content_ids["spans"][1]),
+                 "link_text": "bar",
+                 "url": "https://ct.de"},
+                {"type": "span-regular",
+                 "id": str(asset.content_ids["spans"][2]),
+                 "text": " baz."}
+            ]
+        }, asset.content)
+        self.assertEqual(4, Asset.objects.all().count())
+        invalid_delete_response = self.client.get(reverse("delete_all_assets"))
+        self.assertEqual(400, invalid_delete_response.status_code)
+        self.assertEqual({'Error': 'Delete all assets by using a HTTP DELETE command. Other methods are disallowed.'},
+                         json.loads(str(invalid_delete_response.content, encoding="utf-8")))
+        invalid_delete_response = self.client.post(reverse("delete_all_assets"))
+        self.assertEqual(400, invalid_delete_response.status_code)
+        self.assertEqual({'Error': 'Delete all assets by using a HTTP DELETE command. Other methods are disallowed.'},
+                         json.loads(str(invalid_delete_response.content, encoding="utf-8")))
+        delete_all_response = self.client.delete(reverse("delete_all_assets"))
+        self.assertEqual(200, delete_all_response.status_code)
+        self.assertEqual({
+            'Asset': 4,
+            'Asset_in_detail': {'assets.Asset': 4},
+            'Enum': 0,
+            'Enum_in_detail': {'assets.Enum': 0},
+            'Text': 3,
+            'Text_in_detail': {'assets.Text': 3},
+            'UriElement': 1,
+            'UriElement_in_detail': {'assets.UriElement': 1}},
+            json.loads(str(delete_all_response.content, encoding="utf-8")))
+        self.assertEqual(0, Asset.objects.all().count())
+        self.assertEqual(0, Text.objects.all().count())
+        self.assertEqual(0, UriElement.objects.all().count())
+        self.assertEqual(0, Enum.objects.all().count())

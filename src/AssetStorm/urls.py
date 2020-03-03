@@ -16,7 +16,8 @@ Including another URLconf
 from django.urls import path
 from AssetStorm.assets.views import load_asset, save_asset, turnout, query
 from AssetStorm.assets.views import get_template, get_schema, get_types_for_parent
-from AssetStorm.assets.views import deliver_open_api_definition, live, update_caches
+from AssetStorm.assets.views import deliver_open_api_definition, live
+from AssetStorm.assets.views import update_caches, delete_all_assets
 
 urlpatterns = [
     path('', turnout, name="turnout_request"),
@@ -29,5 +30,6 @@ urlpatterns = [
     path('get_types_for_parent', get_types_for_parent, name="get_types_for_parent"),
     path('update_caches', update_caches, name="update_caches"),
     path('openapi.json', deliver_open_api_definition, name="openapi.json"),
-    path('live', live, name="live")
+    path('live', live, name="live"),
+    path('delete_all_assets', delete_all_assets, name="delete_all_assets")
 ]

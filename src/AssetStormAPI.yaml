@@ -164,13 +164,13 @@ paths:
       parameters:
         - name: type_name
           in: query
-          required: true
+          required: false
           description: The type_name of the AssetType
           schema:
             type: string
         - name: type_id
           in: query
-          required: true
+          required: false
           description: The ID of the AssetType
           schema:
             type: integer
@@ -196,10 +196,16 @@ paths:
       parameters:
         - name: parent_type_name
           in: query
-          required: true
+          required: false
           description: The type_name of the parent AssetType
           schema:
             type: string
+        - name: parent_type_id
+          in: query
+          required: false
+          description: The ID of the parent AssetType
+          schema:
+            type: integer
       responses:
         '200':
           description: Returns the list of type names.
@@ -213,6 +219,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /update_caches:
+    get:
+      summary: Build all content caches and raw templates (for searching) for all assets
+      operationId: update_caches
+      tags:
+        - asset
+      responses:
+        '200':
+          description: Returns statistics on the workload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateStatisticsResponse"
   /openapi.json:
     get:
       summary: Load template definitions for AssetType objects.
@@ -245,6 +264,25 @@ paths:
             text/plain:
               schema:
                 type: string
+  /delete_all_assets:
+    delete:
+      summary: Delete all content from the database. Use this with care! The view exists for automatic tests.
+      operationId: delete_all_assets
+      tags:
+        - asset
+      responses:
+        '200':
+          description: Successfully deleted all assets and base types like Text, URIElement and Enum
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteAllResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     ErrorResponse:
@@ -321,3 +359,35 @@ components:
           - type: array
             items:
               $ref: "#/components/schemas/AssetTree"
+    UpdateStatisticsResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+        rebuilt_content_caches:
+          type: integer
+        rendered_raw_templates:
+          type: integer
+    DeleteAllResponse:
+      type: object
+      properties:
+        Asset:
+          type: integer
+        Asset_in_detail:
+          type: object
+          format: string
+        Text:
+          type: integer
+        Text_in_detail:
+          type: object
+          format: string
+        URIElement:
+          type: integer
+        URIElement_in_detail:
+          type: object
+          format: string
+        Enum:
+          type: integer
+        Enum_in_detail:
+          type: object
+          format: string
