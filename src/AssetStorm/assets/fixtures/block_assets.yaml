@@ -172,6 +172,7 @@
       raw: "{{code}}\n\n"
       markdown: "```{{language}}\n{{code}}\n```\n\n"
       proof_html: "<pre><code class=\"language-{{language}}\">{{code}}</code></pre>"
+      sy_xml: "{{highlight_sy_xml(code)}}"
 - model: assets.AssetType
   pk: 32
   fields:
