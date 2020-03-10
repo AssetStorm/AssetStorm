@@ -27,6 +27,11 @@
       markdown: "![{{for(caption)}}{{caption}}{{endfor}}]({{image_uri}} \"{{alt}}\")\n\n"
       proof_html: "<block-image><img src=\"{{image_uri}}\" alt=\"{{alt}}\" />\
       <p>{{for(caption)}}{{caption}}{{endfor}}</p></block-image>"
+      sy_xml: "<image storedata=\"{{image_uri}}\">\n\
+      <imagesubtitle><simplepara id=\"{{$id}}\" type=\"standard\">\
+      {{for(caption)}}{{caption}}{{endfor}}\
+      </simplepara></imagesubtitle>\n\
+      </image>"
 - model: assets.AssetType
   pk: 22
   fields:
@@ -68,6 +73,11 @@
       *{{attribution}}*\n\n<!--- -->\n\n"
       proof_html: "<block-citation><p>{{statement}}</p>\
       <block-citation-attribution>{{attribution}}</block-citation-attribution></block-citation>"
+      sy_xml: "<box type=\"quote\">\n\
+      <title></title>\n\
+      <simplepara id=\"{{$id}}\" type=\"standard\">{{statement}}\n\
+      <linebreak/><italic>{{attribution}}</italic></simplepara>\n\
+      </box>"
 - model: assets.AssetType
   pk: 25
   fields:
@@ -114,6 +124,10 @@
       {{for(content)}}{{content}}{{endfor}}\n\n<!--- -->\n\n"
       proof_html: "<block-info-box><h1>{{title}}</h1>\
       <p>{{for(content)}}{{content}}{{endfor}}</p></block-info-box>"
+      sy_xml: "<box type=\"default\">\n\
+      <title>{{title}}</title>\n\
+      {{for(content)}}{{content}}{{endfor}}\n\
+      </box>"
 - model: assets.AssetType
   pk: 28
   fields:
@@ -289,3 +303,16 @@
       sy_xml: "<list type=\"standard\" style=\"bullet\">\
       {{for(items)}}<listitem>{{items}}</listitem>{{endfor}}\
       </list>"
+- model: assets.AssetType
+  pk: 73
+  fields:
+    type_name: block-plain-listing-box
+    parent_type: 5
+    schema: {"content": [5]}
+    templates:
+      raw: "-----\n{{for(content)}}{{content}}{{endfor}}\n-----"
+      markdown: "<!---\ntype: block-plain-listing-box\ncontent: MD_BLOCK\n-->\n\n\
+      {{for(content)}}{{content}}{{endfor}}\
+      \n\n<!--- -->"
+      proof_html: "<plain-listing-box>{{for(content)}}{{content}}{{endfor}}</plain-listing-box>"
+      sy_xml: "<box type=\"listing\">\n{{for(content)}}{{content}}{{endfor}}\n</box>"
