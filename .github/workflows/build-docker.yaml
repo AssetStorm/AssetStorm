@@ -9,6 +9,6 @@ jobs:
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: assetstorm/assetstorm
-        username: ${{ secrets.DOCKER_USER }}
+        username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: src
