@@ -145,3 +145,14 @@
       markdown: "~~{{text}}~~"
       proof_html: "<del>{{text}}</del>"
       sy_xml: "<subscript>{{text}}</subscript>"
+- model: assets.AssetType
+  pk: 74
+  fields:
+    type_name: span-mathml
+    parent_type: 4
+    schema: {"formula": 1}
+    templates:
+      raw: "{{formula}}\n\n"
+      markdown: "{{formula}}\n\n"
+      proof_html: "<math xmlns=\"http://www.w3.org/1998/Math/MathML\">{{formula}}</math>"
+      sy_xml: "<math xmlns=\"http://www.w3.org/1998/Math/MathML\">{{formula}}</math>"
