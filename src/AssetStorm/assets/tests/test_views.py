@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.test import Client
-from test.support import EnvironmentVarGuard
 from django.urls import reverse
 from django.core.management import call_command
+from unittest.mock import patch
 from AssetStorm.assets.models import AssetType, Asset, Text, UriElement, Enum, EnumType
 from AssetStorm.urls import urlpatterns
 import json
@@ -986,7 +986,8 @@ class TestGetTypesForParentView(TestCase):
         self.assertEqual("application/json", response['content-type'])
         correct_spans = ['span-strong-emphasized', 'span-ct-link', 'span-abbreviation', 'span-program',
                          'span-link', 'span-path', 'span-listing', 'span-strong', 'span-emphasized',
-                         'span-regular', 'span-container', 'span-line-break-container', 'span-strikeout']
+                         'span-regular', 'span-container', 'span-line-break-container', 'span-strikeout',
+                         'span-mathml']
         loaded_spans = json.loads(response.content)
         self.assertEqual(len(correct_spans), len(loaded_spans))
         for span in correct_spans:
@@ -1027,7 +1028,6 @@ class TestUpdateCachesView(TestCase):
 class TestDeliverOpenApiDefinition(TestCase):
     def setUp(self) -> None:
         self.client = Client()
-        self.env = EnvironmentVarGuard()
 
     def test_default_first_server(self):
         response = self.client.get(reverse("openapi.json"))
@@ -1041,14 +1041,15 @@ class TestDeliverOpenApiDefinition(TestCase):
             pattern = '/' + str(url.pattern).replace('<str:', '{').replace('>', '}')
             self.assertIn(pattern, api_def['paths'])
 
+    @patch('os.getenv', lambda *key: {
+        'SERVER_NAME': 'https://test.org/foo/bar/baz'
+    }[key[0]])
     def test_server_by_env(self):
-        self.env.set('SERVER_NAME', 'https://test.org/foo/bar/baz')
-        with self.env:
-            response = self.client.get(reverse("openapi.json"))
-            self.assertEqual(200, response.status_code)
-            self.assertEqual("application/json", response['content-type'])
-            api_def = json.loads(response.content)
-            self.assertEqual({'url': 'https://test.org/foo/bar/baz'}, api_def['servers'][0])
+        response = self.client.get(reverse("openapi.json"))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("application/json", response['content-type'])
+        api_def = json.loads(response.content)
+        self.assertEqual({'url': 'https://test.org/foo/bar/baz'}, api_def['servers'][0])
 
 
 class TestDeleteAllAssets(TestCase):
