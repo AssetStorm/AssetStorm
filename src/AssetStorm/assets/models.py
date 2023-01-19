@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models.fields.json import JSONField
+from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone
+from copy import deepcopy
 import uuid
 import re
 
@@ -23,7 +26,6 @@ class EnumType(models.Model):
 class Asset(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     t = models.ForeignKey(AssetType, on_delete=models.CASCADE, related_name="assets")
-    content_ids = JSONField(blank=True, null=True)
     content_cache = JSONField(blank=True, null=True)
     text_reference_list = ArrayField(models.IntegerField(), default=list)
     uri_reference_list = ArrayField(models.IntegerField(), default=list)
@@ -75,6 +77,13 @@ class Asset(models.Model):
             return sub_asset.content
 
     @property
+    def change_chain(self):
+        if self.changes.count() > 0:
+            return self.changes.order_by("time").last()
+        else:
+            return None
+
+    @property
     def content(self):
         if self.content_cache is not None:
             return self.content_cache
@@ -83,18 +92,18 @@ class Asset(models.Model):
             'type': self.t.type_name,
             'id': str(self.pk)
         }
-        for k in self.content_ids.keys():
+        for k in self.change_chain.structure.keys():
             if type(self.t.schema[k]) is list:
                 asset_content = [
                     self.get_asset_content(self.t.schema[k][0], e)
-                    for e in self.content_ids[k]
+                    for e in self.change_chain.structure[k]
                 ]
             elif type(self.t.schema[k]) is dict and \
                     len(self.t.schema[k].keys()) == 1 and \
                     "3" in self.t.schema[k].keys():
-                asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
+                asset_content = self.get_asset_content(self.t.schema[k], self.change_chain.structure[k])
             else:
-                asset_content = self.get_asset_content(self.t.schema[k], self.content_ids[k])
+                asset_content = self.get_asset_content(self.t.schema[k], self.change_chain.structure[k])
             self.content_cache[k] = asset_content
         self.save()
         return self.content_cache
@@ -106,6 +115,26 @@ class Asset(models.Model):
         self.raw_content_cache = None
         self.clear_reference_lists()
         self.save()
+
+    @classmethod
+    def produce(cls, t: AssetType, content_ids: dict):
+        a = Asset(t=t)
+        a.save()
+        change_chain = None
+        for key in t.schema:
+            if key not in content_ids:
+                raise StructureError("The key %s is missing in the content_ids." % key)
+            change_chain = AssetChange(time=timezone.now(), asset=a, parent=change_chain,
+                                       key=key, inserts=content_ids[key])
+            change_chain = change_chain.bubble()
+        return a
+
+    def change(self, key: str, position: int = 0, delete_count: int = 0, inserts=None):
+        if inserts is None:
+            inserts = []
+        new_change = AssetChange(asset=self, parent=self.change_chain, key=key,
+                                 position=position, delete=delete_count, inserts=inserts)
+        new_change.bubble()
 
     def render_template(self, template_key="raw"):
         def get_key_content(type_id, pk):
@@ -130,7 +159,7 @@ class Asset(models.Model):
             list_matches = re.match(key_list_regex, consumable_template, re.MULTILINE)
             while list_matches and type(self.t.schema[key]) is list:
                 list_content = ""
-                for pk in self.content_ids[key]:
+                for pk in self.change_chain.structure[key]:
                     consumable_list_template = list_matches.groupdict()["list_template"]
                     matches = re.match(key_regex, consumable_list_template, re.MULTILINE)
                     while matches:
@@ -138,14 +167,14 @@ class Asset(models.Model):
                             self.t.schema[key][0], pk) + matches.groupdict()["end_part"]
                         matches = re.match(key_regex, consumable_list_template, re.MULTILINE)
                     list_content += consumable_list_template
-                consumable_template = list_matches.groupdict()["start_part"] + \
+                consumable_template = str(list_matches.groupdict()["start_part"]) + \
                     list_content + \
-                    list_matches.groupdict()["end_part"]
+                    str(list_matches.groupdict()["end_part"])
                 list_matches = re.match(key_list_regex, consumable_template, re.MULTILINE)
             matches = re.match(key_regex, consumable_template, re.MULTILINE)
             while matches:
                 consumable_template = matches.groupdict()["start_part"] + get_key_content(
-                    self.t.schema[key], self.content_ids[key]) + matches.groupdict()["end_part"]
+                    self.t.schema[key], self.change_chain.structure[key]) + matches.groupdict()["end_part"]
                 matches = re.match(key_regex, consumable_template, re.MULTILINE)
         if template_key == "raw":
             self.raw_content_cache = consumable_template
@@ -153,14 +182,79 @@ class Asset(models.Model):
         return consumable_template
 
 
+class AssetChange(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    time = models.DateTimeField(auto_now=False)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, default=None, related_name="changes")
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name="child", null=True, default=None)
+    key = models.CharField(max_length=128)
+    position = models.IntegerField(default=0)
+    delete = models.IntegerField(default=0)
+    inserts = JSONField(blank=True, null=True, default=None)
+    structure_cache = JSONField(blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "<AssetChange %s Key:%s (%d|%d|%s) -- %s>" % (self.pk, self.key,
+                                                             self.position, self.delete, str(self.inserts),
+                                                             str(self.parent))
+
+    @property
+    def structure(self):
+        if self.structure_cache is not None:
+            return self.structure_cache
+        else:
+            if self.parent is None:
+                structure = deepcopy(self.asset.t.schema)
+                for key in structure.keys():
+                    if type(structure[key]) is list:
+                        structure[key] = []
+                    else:
+                        structure[key] = None
+            else:
+                structure = self.parent.structure
+            if type(structure[self.key]) is list:
+                del structure[self.key][self.position:self.position+self.delete]
+                for i, insertion in enumerate(self.inserts):
+                    structure[self.key].insert(self.position + i, insertion)
+            else:
+                structure[self.key] = self.inserts
+            self.structure_cache = structure
+            self.save()
+            return structure
+
+    def invalidate_structure_cache(self):
+        self.structure_cache = None
+        self.save()
+        for c in self.child:
+            c.invalidate_structure_cache()
+
+    def bubble(self):
+        if self.parent is not None and self.parent.time > self.time:
+            p = self.parent
+            self.parent = p.parent
+            p.parent = self
+            p.invalidate_structure_cache()
+            p.save()
+            self.bubble()
+            self.save()
+            return p
+        else:
+            self.save()
+            return self
+
+
 class Text(models.Model):
     text = models.TextField()
 
 
 class UriElement(models.Model):
-    uri = models.CharField(max_length=256)
+    uri = models.TextField()
 
 
 class Enum(models.Model):
     t = models.ForeignKey(EnumType, on_delete=models.CASCADE)
     item = models.TextField()
+
+
+class StructureError(Exception):
+    pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from AssetStorm.assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum
+from AssetStorm.assets.models import AssetType, EnumType, Asset, Text, UriElement, Enum, AssetChange
 import json
 
 
@@ -26,7 +26,7 @@ class AssetBasicTestCase(TestCase):
     def test_foo(self):
         t1 = Text(text="Foo")
         t1.save()
-        t1_span = Asset(t=self.at("span-regular"), content_ids={"text": t1.pk})
+        t1_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": t1.pk})
         t1_span.save()
         self.assertJSONEqual(json.dumps(t1_span.content), json.dumps({
             'type': "span-regular",
@@ -39,28 +39,28 @@ class AssetBasicTestCase(TestCase):
         title.save()
         intro_text = Text(text="This is the beginning of the article.")
         intro_text.save()
-        intro_span = Asset(t=self.at("span-regular"), content_ids={"text": intro_text.pk})
+        intro_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": intro_text.pk})
         intro_span.save()
-        intro = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(intro_span.pk)]})
+        intro = Asset.produce(t=self.at("block-paragraph"), content_ids={"spans": [str(intro_span.pk)]})
         intro.save()
         end_text1 = Text(text="This is the ")
         end_text1.save()
-        end_span1 = Asset(t=self.at("span-regular"), content_ids={"text": end_text1.pk})
+        end_span1 = Asset.produce(t=self.at("span-regular"), content_ids={"text": end_text1.pk})
         end_span1.save()
         end_text2 = Text(text="end")
         end_text2.save()
-        end_span2 = Asset(t=self.at("span-emphasized"), content_ids={"text": end_text2.pk})
+        end_span2 = Asset.produce(t=self.at("span-emphasized"), content_ids={"text": end_text2.pk})
         end_span2.save()
         end_text3 = Text(text=" of the article.")
         end_text3.save()
-        end_span3 = Asset(t=self.at("span-regular"), content_ids={"text": end_text3.pk})
+        end_span3 = Asset.produce(t=self.at("span-regular"), content_ids={"text": end_text3.pk})
         end_span3.save()
-        end = Asset(t=self.at("block-paragraph"), content_ids={"spans": [
+        end = Asset.produce(t=self.at("block-paragraph"), content_ids={"spans": [
             str(end_span1.pk),
             str(end_span2.pk),
             str(end_span3.pk)]})
         end.save()
-        a = Asset(t=self.at("article"), content_ids={
+        a = Asset.produce(t=self.at("article"), content_ids={
             "title": str(title.pk),
             "content": [str(intro.pk), str(end.pk)]
         })
@@ -89,12 +89,12 @@ class AssetBasicTestCase(TestCase):
         language_type = EnumType.objects.get(pk=2)
         language = Enum(t=language_type, item="python")
         language.save()
-        listing_block = Asset(t=self.at("block-listing"), content_ids={
+        listing_block = Asset.produce(t=self.at("block-listing"), content_ids={
             "language": language.pk,
             "code": code.pk
         })
         listing_block.save()
-        box = Asset(t=self.at("block-accompaniement-box"), content_ids={
+        box = Asset.produce(t=self.at("block-accompaniement-box"), content_ids={
             "title": title.pk,
             "content": [str(listing_block.pk)]})
         box.save()
@@ -121,13 +121,13 @@ class AssetBasicTestCase(TestCase):
         link_target.save()
         end = Text(text=" which leads to https://ct.de.")
         end.save()
-        start_span = Asset(t=self.at("span-regular"), content_ids={"text": start.pk})
+        start_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": start.pk})
         start_span.save()
-        link_span = Asset(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_target.pk})
+        link_span = Asset.produce(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_target.pk})
         link_span.save()
-        end_span = Asset(t=self.at("span-regular"), content_ids={"text": end.pk})
+        end_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": end.pk})
         end_span.save()
-        paragraph = Asset(t=self.at("block-paragraph"), content_ids={"spans": [
+        paragraph = Asset.produce(t=self.at("block-paragraph"), content_ids={"spans": [
             str(start_span.pk),
             str(link_span.pk),
             str(end_span.pk)]})
@@ -153,7 +153,7 @@ class AssetBasicTestCase(TestCase):
     def test_cache_usage(self):
         text = Text(text="cached span")
         text.save()
-        text_span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        text_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": text.pk})
         text_span.save()
         self.assertIsNone(text_span.content_cache)
         expected_content = json.dumps({
@@ -169,9 +169,9 @@ class AssetBasicTestCase(TestCase):
     def test_clear_cache(self):
         text = Text(text="cached text")
         text.save()
-        span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        span = Asset.produce(t=self.at("span-regular"), content_ids={"text": text.pk})
         span.save()
-        block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(span.pk)]})
+        block = Asset.produce(t=self.at("block-paragraph"), content_ids={"spans": [str(span.pk)]})
         block.save()
         self.assertIsNone(span.content_cache)
         self.assertIsNone(block.content_cache)
@@ -202,25 +202,25 @@ class AssetBasicTestCase(TestCase):
     def test_reference_lists(self):
         text = Text(text="text in span and a ")
         text.save()
-        text_span = Asset(t=self.at("span-regular"), content_ids={"text": text.pk})
+        text_span = Asset.produce(t=self.at("span-regular"), content_ids={"text": text.pk})
         text_span.save()
         link_text = Text(text="link text.")
         link_text.save()
         link_url = UriElement(uri="https://ct.de")
         link_url.save()
-        link_span = Asset(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_url.pk})
+        link_span = Asset.produce(t=self.at("span-link"), content_ids={"link_text": link_text.pk, "url": link_url.pk})
         link_span.save()
-        text_block = Asset(t=self.at("block-paragraph"), content_ids={"spans": [str(text_span.pk), str(link_span.pk)]})
+        text_block = Asset.produce(t=self.at("block-paragraph"), content_ids={"spans": [str(text_span.pk), str(link_span.pk)]})
         text_block.save()
         code = Text(text="a = 2 + 1\nprint(a == 3)")
         code.save()
         code_lang = Enum(t=EnumType.objects.get(pk=2), item="python")
         code_lang.save()
-        listing_block = Asset(t=self.at("block-listing"), content_ids={"language": code_lang.pk, "code": code.pk})
+        listing_block = Asset.produce(t=self.at("block-listing"), content_ids={"language": code_lang.pk, "code": code.pk})
         listing_block.save()
         box_heading = Text(text="Box heading")
         box_heading.save()
-        box = Asset(t=self.at("block-info-box"), content_ids={
+        box = Asset.produce(t=self.at("block-info-box"), content_ids={
             "title": box_heading.pk,
             "content": [str(text_block.pk), str(listing_block.pk)]})
         box.save()
@@ -307,7 +307,7 @@ class RawTemplateTests(TestCase):
         insufficient_type.save()
         t = Text(text="Foobar!")
         t.save()
-        asset = Asset(t=insufficient_type, content_ids={
+        asset = Asset.produce(t=insufficient_type, content_ids={
             "text": t.pk
         })
         asset.save()
@@ -318,7 +318,7 @@ class RawTemplateTests(TestCase):
         statement.save()
         attribution = Text(text="Lenin")
         attribution.save()
-        asset = Asset(t=AssetType.objects.get(type_name="block-citation"), content_ids={
+        asset = Asset.produce(t=AssetType.objects.get(type_name="block-citation"), content_ids={
             "statement": statement.pk, "attribution": attribution.pk
         })
         asset.save()
@@ -336,7 +336,7 @@ class RawTemplateTests(TestCase):
         t2.save()
         t3 = Text(text="Baz")
         t3.save()
-        asset = Asset(t=ul, content_ids={"texts": [t1.pk, t2.pk, t3.pk]})
+        asset = Asset.produce(t=ul, content_ids={"texts": [t1.pk, t2.pk, t3.pk]})
         asset.save()
         self.assertEqual(asset.render_template("html"), "<ul>\n  <li>Foo</li>\n  <li>Bar</li>\n  <li>Baz</li>\n</ul>")
         self.assertEqual(asset.render_template(), " - Foo\n - Bar\n - Baz\n")
@@ -382,11 +382,11 @@ class RawTemplateTests(TestCase):
         e2.save()
         e3 = Enum(t=EnumType.objects.get(pk=2), item="d")
         e3.save()
-        a1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t2.pk})
+        a1 = Asset.produce(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t2.pk})
         a1.save()
-        a2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t1.pk})
+        a2 = Asset.produce(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t1.pk})
         a2.save()
-        asset = Asset(t=all_type, content_ids={
+        asset = Asset.produce(t=all_type, content_ids={
             "text": t1.pk,
             "url": l1.pk,
             "enum": e1.pk,
@@ -458,11 +458,11 @@ class RawTemplateTests(TestCase):
         t1.save()
         t2 = Text(text="Bar")
         t2.save()
-        a1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
+        a1 = Asset.produce(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
         a1.save()
-        a2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
+        a2 = Asset.produce(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
         a2.save()
-        p = Asset(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={
+        p = Asset.produce(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={
             "spans": [str(a1.pk), str(a2.pk)]
         })
         p.save()
@@ -479,16 +479,16 @@ class RawTemplateTests(TestCase):
         caption_text2.save()
         caption_text3 = Text(text=" of foo.")
         caption_text3.save()
-        caption_span1 = Asset(t=AssetType.objects.get(type_name="caption-span-regular"),
-                              content_ids={"text": caption_text1.pk})
+        caption_span1 = Asset.produce(t=AssetType.objects.get(type_name="caption-span-regular"),
+                                      content_ids={"text": caption_text1.pk})
         caption_span1.save()
-        caption_span2 = Asset(t=AssetType.objects.get(type_name="caption-span-emphasized"),
-                              content_ids={"text": caption_text2.pk})
+        caption_span2 = Asset.produce(t=AssetType.objects.get(type_name="caption-span-emphasized"),
+                                      content_ids={"text": caption_text2.pk})
         caption_span2.save()
-        caption_span3 = Asset(t=AssetType.objects.get(type_name="caption-span-regular"),
-                              content_ids={"text": caption_text3.pk})
+        caption_span3 = Asset.produce(t=AssetType.objects.get(type_name="caption-span-regular"),
+                                      content_ids={"text": caption_text3.pk})
         caption_span3.save()
-        img = Asset(t=AssetType.objects.get(type_name="block-image"), content_ids={
+        img = Asset.produce(t=AssetType.objects.get(type_name="block-image"), content_ids={
             "image_uri": img_uri.pk,
             "alt": alt_text.pk,
             "caption": [str(caption_span1.pk), str(caption_span2.pk), str(caption_span3.pk)]
@@ -502,16 +502,16 @@ class RawTemplateTests(TestCase):
         t1.save()
         t2 = Text(text="Bar")
         t2.save()
-        s1 = Asset(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
+        s1 = Asset.produce(t=AssetType.objects.get(type_name="span-regular"), content_ids={"text": t1.pk})
         s1.save()
-        s2 = Asset(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
+        s2 = Asset.produce(t=AssetType.objects.get(type_name="span-emphasized"), content_ids={"text": t2.pk})
         s2.save()
-        p1 = Asset(t=AssetType.objects.get(type_name="block-paragraph"),
+        p1 = Asset.produce(t=AssetType.objects.get(type_name="block-paragraph"),
                    content_ids={"spans": [str(s1.pk), str(s2.pk)]})
         p1.save()
-        p2 = Asset(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={"spans": [str(s2.pk)]})
+        p2 = Asset.produce(t=AssetType.objects.get(type_name="block-paragraph"), content_ids={"spans": [str(s2.pk)]})
         p2.save()
-        box = Asset(t=AssetType.objects.get(type_name="block-info-box"), content_ids={
+        box = Asset.produce(t=AssetType.objects.get(type_name="block-info-box"), content_ids={
             "title": t2.pk,
             "content": [str(p1.pk), str(p2.pk)]
         })
